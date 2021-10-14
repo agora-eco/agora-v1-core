@@ -1,0 +1,40 @@
+Idea is to create a generic suite of contracts to construct some marketplace.
+
+We will apply these contracts to build a marketplace for UCSD, where students can buy food or groceries through vendors via our marketplace.
+
+Three party system: merchants, "governing" body, participants
+
+Roles:
+// Governing Bodies
+
+
+// Merchants
+
+
+// Participants
+
+
+Flow:
+Governing bodies establish their own decentralized economic ecosystem by deploying the contracts. Merchants can then register and list their products for participants to purchase.
+
+// Merchant onboarding
+1. Merchants are approved by governing body prior to registration
+    1. Merchants accounts are managed internally by the contract
+2. Merchants are approved by governing body at request (requires some sort of onboarding for merchant)
+    1. Merchants have account established prior, and are whitelisted by account address
+        1. Merchants have direct access to funds in their wallet
+
+1. Merchants have access to funds managed by treasury
+
+3. Merchants can create and en(dis)able product listings
+    1. Platform and transaction fee are automatically withdrawn
+        1. Merchants are automatically paid out
+            1. Merchant can declare multiple addresses earning %
+        2. Funds flow into treasury
+
+// Participant onboarding
+1. Participants sign up
+    1. using a custodial wallet with a domain-whitelisted email
+    2. using their existing wallet address
+
+2. Participants purchase listing

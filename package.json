@@ -1,0 +1,33 @@
+{
+  "name": "u-cash",
+  "version": "1.0.0",
+  "description": "decentralizing the collegiate payment infrastructure",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prmali/u-cash.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/prmali/u-cash/issues"
+  },
+  "homepage": "https://github.com/prmali/u-cash#readme",
+  "devDependencies": {
+    "@openzeppelin/hardhat-upgrades": "^1.10.0",
+    "@types/chai": "^4.2.21",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.7.10",
+    "chai": "^4.3.4",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1",
+    "@openzeppelin/contracts-upgradeable": "^4.3.1"
+  }
+}
