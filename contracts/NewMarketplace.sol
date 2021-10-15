@@ -7,6 +7,9 @@ contract NewMarketplace {
 
     struct Product {
         bool exists;
+        bool onSale;
+        uint256 quantity;
+        uint256 stock;
         string name;
         string description;
         uint256 price;
@@ -40,6 +43,25 @@ contract NewMarketplace {
     */
     function purchase(string memory merchant, string memory code) public {
         require(_merchants[merchant].catalog[code].exists, "product dne");
+        require(
+            _merchants[merchant].catalog[code].onSale,
+            "product not on sale"
+        );
+        require(
+            _merchants[merchant].catalog[code].stock == 0,
+            "product out of stock"
+        );
+        require(
+            msg.value >= _merchants[merchant].catalog[code].price,
+            "insufficient balance in txn"
+        );
+
+        _merchants[merchant].catalog[code].stock -= 1;
+
+        if (_merchants[merchant].catalog[code].stock == 0) {
+            _merchants[merchant].catalog[code].onSale = false;
+        }
+
         emit Purchase(
             msg.sender,
             merchant,
@@ -57,38 +79,53 @@ contract NewMarketplace {
     }
 
     /*
+        smite product
+    */
+    function yeet(string memory merchant, string memory code) external {
+        _merchants[merchant].catalog[code].exists = false;
+    }
+
+    /*
+        get product
+    */
+    function getProduct(string memory merchant, string memory code)
+        view
+        returns ()
+    {}
+
+    /*
         merchants register to be queued for approval
     */
     function register(
         string memory name,
-        string memory symbol,
+        string memory merchant,
         string memory description
     ) external {
-        require(_merchants[symbol].exists == false, "merchant exists");
+        require(_merchants[merchant].exists == false, "merchant exists");
 
-        _merchants[symbol].exists = true;
-        _merchants[symbol].name = name;
-        _merchants[symbol].description = description;
-        _merchants[symbol].owners[msg.sender] = true;
+        _merchants[merchant].exists = true;
+        _merchants[merchant].name = name;
+        _merchants[merchant].description = description;
+        _merchants[merchant].owners[msg.sender] = true;
     }
 
     /*
         remove merchant (deactivate)
     */
-    function remove(string memory symbol) external {
-        require(_merchants[symbol].owners[msg.sender], "not owner");
-        require(_merchants[symbol].exists, "merchant dne");
+    function remove(string memory merchant) external {
+        require(_merchants[merchant].owners[msg.sender], "not owner");
+        require(_merchants[merchant].exists, "merchant dne");
 
-        _merchants[symbol].exists = false;
+        _merchants[merchant].exists = false;
     }
 
     /*
         admins approve merchants to start selling on marketplace
     */
-    function approve(string memory symbol) external {
-        require(_merchants[symbol].exists, "merchant dne");
+    function approve(string memory merchant) external {
+        require(_merchants[merchant].exists, "merchant dne");
         require(true, "not admin"); // must be admin
 
-        _merchants[symbol].approved = true;
+        _merchants[merchant].approved = true;
     }
 }
