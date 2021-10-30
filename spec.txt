@@ -1,6 +1,6 @@
 Idea is to create a generic suite of contracts to construct some marketplace.
 
-We will apply these contracts to build a marketplace for UCSD, where students can buy food or groceries through vendors via our marketplace.
+We will apply these contracts to build a marketplace for UCSD, where students can buy food or groceries through merchants via our marketplace.
 
 Three party system: merchants, "governing" body, participants
 

@@ -41,7 +41,10 @@ contract NewMarketplace {
     /*
         participants can purchase products
     */
-    function purchase(string memory merchant, string memory code) public {
+    function purchase(string memory merchant, string memory code)
+        public
+        payable
+    {
         require(_merchants[merchant].catalog[code].exists, "product dne");
         require(
             _merchants[merchant].catalog[code].onSale,
@@ -89,9 +92,14 @@ contract NewMarketplace {
         get product
     */
     function getProduct(string memory merchant, string memory code)
+        public
         view
-        returns ()
-    {}
+        returns (Product memory)
+    {
+        require(_merchants[merchant].exists, "merchant dne");
+        require(_merchants[merchant].catalog[code].exists, "product dne");
+        return _merchants[merchant].catalog[code];
+    }
 
     /*
         merchants register to be queued for approval
