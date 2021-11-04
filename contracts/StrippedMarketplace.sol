@@ -48,8 +48,8 @@ contract StrippedMarketplace {
 
     function create(
         string memory _productCode,
-        uint256 _price,
         string memory _name,
+        uint256 _price,
         uint256 _quantity
     ) public productExist(_productCode) onlyOwner {
         _catalog[_productCode] = Product(true, _price, _name, _quantity);
