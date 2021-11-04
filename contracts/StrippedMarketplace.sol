@@ -40,9 +40,9 @@ contract StrippedMarketplace {
         _;
     }
 
-    constructor(string memory _name, string memory _symbol) {
-        name = _name;
+    constructor(string memory _symbol, string memory _name) {
         symbol = _symbol;
+        name = _name;
         owner = msg.sender;
     }
 
