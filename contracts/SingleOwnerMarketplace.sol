@@ -25,7 +25,12 @@ contract SingleOwnerMarketplace {
         address indexed initiator
     );
 
-    event Restock(string name, uint256 quantity, address indexed initiator);
+    event Restock(
+        string name,
+        uint256 quantity,
+        bool forced,
+        address indexed initiator
+    );
 
     modifier productExist(string memory _productCode) {
         require(
@@ -72,17 +77,34 @@ contract SingleOwnerMarketplace {
         emit Purchase(_product.name, 1, _product.price * 1, msg.sender);
     }
 
-    function restock(string memory _productCode, uint256 quantity)
+    function restock(string memory _productCode, uint256 _quantity)
         public
         onlyOwner
         productExist(_productCode)
     {
         Product memory _product = _catalog[_productCode];
 
-        _product.quantity += quantity;
+        _product.quantity += _quantity;
         _catalog[_productCode] = _product;
 
-        emit Restock(_product.name, quantity, msg.sender);
+        emit Restock(_product.name, _quantity, false, msg.sender);
+    }
+
+    function restock(
+        string memory _productCode,
+        uint256 _quantity,
+        bool _forced
+    ) public onlyOwner productExist(_productCode) {
+        Product memory _product = _catalog[_productCode];
+
+        if (_forced == true) {
+            _product.quantity = _quantity;
+        } else {
+            _product.quantity += _quantity;
+        }
+        _catalog[_productCode] = _product;
+
+        emit Restock(_product.name, _quantity, _forced, msg.sender);
     }
 
     function inspect(string calldata _productCode)
