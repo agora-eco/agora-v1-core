@@ -6,7 +6,7 @@ pragma solidity ^0.8.0;
 
  */
 
-contract StrippedMarketplace {
+contract SingleOwnerMarketplace {
     address owner;
     string public name;
     string public symbol;
