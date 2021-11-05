@@ -18,6 +18,21 @@ contract SingleOwnerMarketplace {
     }
     mapping(string => Product) _catalog;
 
+    event Create(
+        string productCode,
+        string name,
+        uint256 price,
+        uint256 quantity,
+        address indexed initiator
+    );
+
+    event Adjust(
+        string productCode,
+        string name,
+        uint256 price,
+        address indexed initiator
+    );
+
     event Purchase(
         string name,
         uint256 quantity,
@@ -26,13 +41,14 @@ contract SingleOwnerMarketplace {
     );
 
     event Restock(
+        string productCode,
         string name,
         uint256 quantity,
         bool forced,
         address indexed initiator
     );
 
-    modifier productExist(string memory _productCode) {
+    modifier productNotExist(string memory _productCode) {
         require(
             _catalog[_productCode].exists == false,
             "product already exists"
@@ -56,14 +72,32 @@ contract SingleOwnerMarketplace {
         string memory _name,
         uint256 _price,
         uint256 _quantity
-    ) public productExist(_productCode) onlyOwner {
+    ) public productNotExist(_productCode) onlyOwner {
         _catalog[_productCode] = Product(true, _price, _name, _quantity);
+
+        emit Create(_productCode, _name, _price, _quantity, msg.sender);
+    }
+
+    function adjust(
+        string memory _productCode,
+        string memory _name,
+        uint256 _price
+    ) public onlyOwner {
+        require(_catalog[_productCode].exists == true, "product dne");
+        _catalog[_productCode] = Product(
+            true,
+            _price,
+            _name,
+            _catalog[_productCode].quantity
+        );
+
+        emit Adjust(_productCode, _name, _price, msg.sender);
     }
 
     function purchase(string memory _productCode, uint256 _quantity)
         public
         payable
-        productExist(_productCode)
+        productNotExist(_productCode)
     {
         Product memory _product = _catalog[_productCode];
 
@@ -79,6 +113,7 @@ contract SingleOwnerMarketplace {
         _catalog[_productCode] = _product;
 
         payable(owner).transfer(_product.price);
+
         emit Purchase(
             _product.name,
             _quantity,
@@ -90,21 +125,21 @@ contract SingleOwnerMarketplace {
     function restock(string memory _productCode, uint256 _quantity)
         public
         onlyOwner
-        productExist(_productCode)
+        productNotExist(_productCode)
     {
         Product memory _product = _catalog[_productCode];
 
         _product.quantity += _quantity;
         _catalog[_productCode] = _product;
 
-        emit Restock(_product.name, _quantity, false, msg.sender);
+        emit Restock(_productCode, _product.name, _quantity, false, msg.sender);
     }
 
     function restock(
         string memory _productCode,
         uint256 _quantity,
         bool _forced
-    ) public onlyOwner productExist(_productCode) {
+    ) public onlyOwner productNotExist(_productCode) {
         Product memory _product = _catalog[_productCode];
 
         if (_forced == true) {
@@ -114,7 +149,13 @@ contract SingleOwnerMarketplace {
         }
         _catalog[_productCode] = _product;
 
-        emit Restock(_product.name, _quantity, _forced, msg.sender);
+        emit Restock(
+            _productCode,
+            _product.name,
+            _quantity,
+            _forced,
+            msg.sender
+        );
     }
 
     function inspect(string calldata _productCode)
