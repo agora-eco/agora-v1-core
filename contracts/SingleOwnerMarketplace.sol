@@ -67,6 +67,7 @@ contract SingleOwnerMarketplace {
     {
         Product memory _product = _catalog[_productCode];
 
+        require(_quantity > 0, "invalid quantity");
         require(_product.quantity > 0, "product oos");
         require(_product.quantity >= _quantity, "insufficient stock");
         require(
