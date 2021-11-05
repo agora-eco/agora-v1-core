@@ -60,7 +60,7 @@ contract SingleOwnerMarketplace {
         _catalog[_productCode] = Product(true, _price, _name, _quantity);
     }
 
-    function purchase(string memory _productCode)
+    function purchase(string memory _productCode, uint256 _quantity)
         public
         payable
         productExist(_productCode)
@@ -68,13 +68,19 @@ contract SingleOwnerMarketplace {
         Product memory _product = _catalog[_productCode];
 
         require(_product.quantity > 0, "product oos");
+        require(_product.quantity >= _quantity, "insufficient stock");
         require(_product.price * 10**18 <= msg.value, "insufficient funds");
 
-        _product.quantity -= 1;
+        _product.quantity -= _quantity;
         _catalog[_productCode] = _product;
 
         payable(owner).transfer(_product.price);
-        emit Purchase(_product.name, 1, _product.price * 1, msg.sender);
+        emit Purchase(
+            _product.name,
+            _quantity,
+            _product.price * _quantity,
+            msg.sender
+        );
     }
 
     function restock(string memory _productCode, uint256 _quantity)
