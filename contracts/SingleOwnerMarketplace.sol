@@ -69,7 +69,10 @@ contract SingleOwnerMarketplace {
 
         require(_product.quantity > 0, "product oos");
         require(_product.quantity >= _quantity, "insufficient stock");
-        require(_product.price * 10**18 <= msg.value, "insufficient funds");
+        require(
+            _quantity * _product.price * 10**18 <= msg.value,
+            "insufficient funds"
+        );
 
         _product.quantity -= _quantity;
         _catalog[_productCode] = _product;
