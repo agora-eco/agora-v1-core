@@ -25,30 +25,25 @@ Bob purchases product ✔
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("SingleOwnerMarketplace", () => {
+describe("SingleOwnerShop", () => {
 	let accounts;
-	let SingleOwnerMarketplace, singleOwnerMarketplace;
+	let SingleOwnerShop, singleOwnerShop;
 
 	before(async () => {
 		accounts = await ethers.getSigners();
-		SingleOwnerMarketplace = await ethers.getContractFactory(
-			"SingleOwnerMarketplace"
-		);
-		singleOwnerMarketplace = await SingleOwnerMarketplace.deploy(
-			"RBM",
-			"Rich Boy Marketplace"
-		);
+		SingleOwnerShop = await ethers.getContractFactory("SingleOwnerShop");
+		singleOwnerShop = await SingleOwnerShop.deploy("RBS", "Rich Boy Shop");
 	});
 
 	it("Store Creation", async () => {
 		const [alice, bob] = accounts;
-		const validCreateProductTxn = await singleOwnerMarketplace
+		const validCreateProductTxn = await singleOwnerShop
 			.connect(alice)
 			.create("MS", "Milkshake", 0.1, 1);
 		await validCreateProductTxn.wait();
 
 		try {
-			const invalidCreateProductTxn = await singleOwnerMarketplace
+			const invalidCreateProductTxn = await singleOwnerShop
 				.connect(bob)
 				.create("BMS", "Bad Milkshake", 0.1, 1);
 			await invalidCreateProductTxn.wait();
@@ -62,7 +57,7 @@ describe("SingleOwnerMarketplace", () => {
 	it("Catalog Inspection", async () => {
 		const [alice, bob] = accounts;
 
-		expect(await singleOwnerMarketplace.inspect("MS")).to.eql([
+		expect(await singleOwnerShop.inspect("MS")).to.eql([
 			true, // exists
 			ethers.BigNumber.from(0.1), // price
 			"Milkshake", // name
@@ -70,7 +65,7 @@ describe("SingleOwnerMarketplace", () => {
 		]);
 
 		try {
-			await singleOwnerMarketplace.inspect("BMS");
+			await singleOwnerShop.inspect("BMS");
 		} catch (error) {
 			expect(error.message).to.equal(
 				"VM Exception while processing transaction: reverted with reason string: 'product dne'"
@@ -82,7 +77,7 @@ describe("SingleOwnerMarketplace", () => {
 		const [alice, bob] = accounts;
 
 		try {
-			const bobPurchaseTxn = await singleOwnerMarketplace
+			const bobPurchaseTxn = await singleOwnerShop
 				.connect(bob)
 				.purchase("MS", 10, {
 					value: (10 * 0.1 * 10 ** 18).toString(),
@@ -95,7 +90,7 @@ describe("SingleOwnerMarketplace", () => {
 		}
 
 		try {
-			const bobPurchaseTxn = await singleOwnerMarketplace
+			const bobPurchaseTxn = await singleOwnerShop
 				.connect(bob)
 				.purchase("MS", 1, {
 					value: 0,
@@ -107,14 +102,14 @@ describe("SingleOwnerMarketplace", () => {
 			);
 		}
 
-		const bobPurchaseTxn = await singleOwnerMarketplace
+		const bobPurchaseTxn = await singleOwnerShop
 			.connect(bob)
 			.purchase("MS", 1, {
 				value: (0.1 * 10 ** 18).toString(),
 			});
 		await bobPurchaseTxn.wait();
 
-		expect(await singleOwnerMarketplace.inspect("MS")).to.eql([
+		expect(await singleOwnerShop.inspect("MS")).to.eql([
 			true, // exists
 			ethers.BigNumber.from(0.1), // price
 			"Milkshake", // name
@@ -124,7 +119,7 @@ describe("SingleOwnerMarketplace", () => {
 		// check for funds decreasing
 
 		try {
-			const bobPurchaseTxn2 = await singleOwnerMarketplace
+			const bobPurchaseTxn2 = await singleOwnerShop
 				.connect(bob)
 				.purchase("MS", 1, {
 					value: 0,
@@ -139,7 +134,7 @@ describe("SingleOwnerMarketplace", () => {
 
 	it("Restock", async () => {
 		try {
-			const bobRestockTxn = await singleOwnerMarketplace
+			const bobRestockTxn = await singleOwnerShop
 				.connect(bob)
 				.restock("MS", 10, true);
 			await bobRestockTxn.wait();
@@ -149,10 +144,10 @@ describe("SingleOwnerMarketplace", () => {
 			);
 		}
 
-		const aliceRestockTxn = await singleOwnerMarketplace.restock("MS", 5);
+		const aliceRestockTxn = await singleOwnerShop.restock("MS", 5);
 		await aliceRestockTxn.wait();
 
-		expect(await singleOwnerMarketplace.inspect("MS")).to.eql([
+		expect(await singleOwnerShop.inspect("MS")).to.eql([
 			true, // exists
 			ethers.BigNumber.from(0.1), // price
 			"Milkshake", // name
