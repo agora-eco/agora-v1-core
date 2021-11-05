@@ -2,11 +2,11 @@
 pragma solidity ^0.8.0;
 
 /**
-    Fundamental marketplace with stripped functionality. Will serve as basis for future iterations of marketplace
+    Fundamental shop with stripped functionality. Will serve as basis for future iterations of marketplace
 
  */
 
-contract SingleOwnerMarketplace {
+contract SingleOwnerShop {
     address owner;
     string public name;
     string public symbol;
