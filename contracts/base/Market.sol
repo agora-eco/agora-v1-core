@@ -2,11 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import {IShop} from "./interfaces/IShop.sol";
+import {IMarket} from "./interfaces/IMarket.sol";
 
-contract Shop is IShop, AccessControl {
+contract Market is IMarket, AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
+    address public owner;
     string public name;
     string public symbol;
     bool public paused;
@@ -36,8 +37,12 @@ contract Shop is IShop, AccessControl {
     {
         symbol = _symbol;
         name = _name;
+        owner = msg.sender;
         _setupRole(ADMIN_ROLE, msg.sender);
-        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
+
+        if (msg.sender != tx.origin) {
+            _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
+        }
 
         emit Establish(_symbol, _name, tx.origin);
     }
@@ -81,11 +86,13 @@ contract Shop is IShop, AccessControl {
         emit Adjust(productCode, name, price, msg.sender);
     }
 
-    function purchase(
-        string memory productCode,
-        uint256 quantity,
-        address owner
-    ) external payable override productNotExist(productCode) isActive {
+    function purchase(string memory productCode, uint256 quantity)
+        external
+        payable
+        override
+        productNotExist(productCode)
+        isActive
+    {
         Product memory product = _catalog[productCode];
 
         require(quantity > 0, "invalid quantity");

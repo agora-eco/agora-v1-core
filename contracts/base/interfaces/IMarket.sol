@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IShop {
+interface IMarket {
     struct Product {
         bool exists;
         uint256 price;
@@ -59,11 +59,9 @@ interface IShop {
         uint256 price
     ) external;
 
-    function purchase(
-        string memory productCode,
-        uint256 quantity,
-        address owner
-    ) external payable;
+    function purchase(string memory productCode, uint256 quantity)
+        external
+        payable;
 
     function restock(string memory productCode, uint256 quantity) external;
 
