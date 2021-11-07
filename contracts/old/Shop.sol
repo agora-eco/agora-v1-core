@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract BaseShop {
+contract Shop {
     string public name;
     string public symbol;
     mapping(string => Product) internal _catalog;
