@@ -42,7 +42,7 @@ interface IMarket {
         address indexed initiator
     );
 
-    function establish(string memory symbol, string memory name) external;
+    //function establish(string memory symbol, string memory name) external;
 
     function pause(bool state) external;
 

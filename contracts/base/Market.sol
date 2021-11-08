@@ -35,10 +35,7 @@ contract Market is IMarket, AccessControl {
         _;
     }
 
-    function establish(string memory _symbol, string memory _name)
-        external
-        override
-    {
+    constructor(string memory _symbol, string memory _name) {
         symbol = _symbol;
         name = _name;
         owner = msg.sender;
