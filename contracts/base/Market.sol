@@ -166,7 +166,7 @@ contract Market is IMarket, AccessControl {
         emit Restock(productCode, product.name, quantity, forced, msg.sender);
     }
 
-    function inspect(string calldata productCode)
+    function inspectItem(string calldata productCode)
         external
         view
         override

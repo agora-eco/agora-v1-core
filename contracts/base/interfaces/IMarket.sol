@@ -74,7 +74,7 @@ interface IMarket {
         bool forced
     ) external;
 
-    function inspect(string calldata productCode)
+    function inspectItem(string calldata productCode)
         external
         view
         returns (Product memory);
