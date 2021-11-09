@@ -7,6 +7,7 @@ interface IMarket {
         uint256 price;
         string name;
         uint256 quantity;
+        address owner;
     }
 
     event Establish(string symbol, string name, address indexed owner);

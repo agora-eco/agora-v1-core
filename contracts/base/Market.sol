@@ -17,6 +17,8 @@ contract Market is IMarket, AccessControl {
     bool public paused;
     mapping(string => Product) internal _catalog;
 
+    // pause event
+
     modifier productNotExist(string memory productCode) {
         require(
             _catalog[productCode].exists == false,
@@ -66,7 +68,13 @@ contract Market is IMarket, AccessControl {
         uint256 price,
         uint256 quantity
     ) external override isAdmin productNotExist(productCode) {
-        _catalog[productCode] = Product(true, price, productName, quantity);
+        _catalog[productCode] = Product(
+            true,
+            price,
+            productName,
+            quantity,
+            msg.sender
+        );
 
         emit Create(productCode, name, price, quantity, msg.sender);
     }
@@ -81,7 +89,8 @@ contract Market is IMarket, AccessControl {
             true,
             price,
             productName,
-            _catalog[productCode].quantity
+            _catalog[productCode].quantity,
+            msg.sender
         );
 
         emit Adjust(productCode, name, price, msg.sender);
