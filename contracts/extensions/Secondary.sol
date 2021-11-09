@@ -119,7 +119,11 @@ contract Secondary is Market {
         _listings[listingId] = listing;
     }
 
-    function inspect(uint256 listingId) external view returns (Listing memory) {
+    function inspectListing(uint256 listingId)
+        external
+        view
+        returns (Listing memory)
+    {
         return _listings[listingId];
     }
 }
