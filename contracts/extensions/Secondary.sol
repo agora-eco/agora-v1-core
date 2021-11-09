@@ -13,7 +13,7 @@ contract Secondary is Market {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
-    Counters.Counter private _listingIds;
+    Counters.Counter private _listingId;
     uint256 public marketplaceFee;
     mapping(uint256 => Listing) _listings;
 
@@ -58,8 +58,8 @@ contract Secondary is Market {
         Product memory product = _catalog[productCode];
         require(product.exists == true, "product dne");
 
-        _listingIds.increment();
-        uint256 newListingId = _listingIds.current();
+        _listingId.increment();
+        uint256 newListingId = _listingId.current();
 
         _listings[newListingId] = Listing(
             true,
