@@ -10,10 +10,10 @@ import {IMarket} from "./interfaces/IMarket.sol";
 
 contract Market is IMarket, AccessControl {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     address public owner;
     string public name;
     string public symbol;
+    string public catalogUri;
     bool public paused;
     mapping(string => Product) internal _catalog;
 
@@ -77,6 +77,14 @@ contract Market is IMarket, AccessControl {
         );
 
         emit Create(productCode, name, price, quantity, msg.sender);
+    }
+
+    function setCatalogUri(string memory _catalogUri)
+        external
+        override
+        isAdmin
+    {
+        catalogUri = _catalogUri;
     }
 
     function adjust(

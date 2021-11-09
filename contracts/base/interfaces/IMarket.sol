@@ -54,6 +54,8 @@ interface IMarket {
         uint256 quantity
     ) external;
 
+    function setCatalogUri(string memory catalogUri) external;
+
     function adjust(
         string memory productCode,
         string memory name,
