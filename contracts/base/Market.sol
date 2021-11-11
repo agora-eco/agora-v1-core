@@ -27,6 +27,11 @@ contract Market is IMarket, AccessControl {
         _;
     }
 
+    modifier productExist(string memory productCode) {
+        require(_catalog[productCode].exists == true, "product dne");
+        _;
+    }
+
     modifier isActive() {
         require(paused == false, "market is paused");
         _;
@@ -91,8 +96,7 @@ contract Market is IMarket, AccessControl {
         string memory productCode,
         string memory productName,
         uint256 price
-    ) external override isAdmin {
-        require(_catalog[productCode].exists == true, "product dne");
+    ) external override isAdmin productExist(productCode) {
         _catalog[productCode] = Product(
             true,
             price,
@@ -107,8 +111,9 @@ contract Market is IMarket, AccessControl {
     function purchase(string memory productCode, uint256 quantity)
         external
         payable
+        virtual
         override
-        productNotExist(productCode)
+        productExist(productCode)
         isActive
     {
         Product memory product = _catalog[productCode];
@@ -116,10 +121,7 @@ contract Market is IMarket, AccessControl {
         require(quantity > 0, "invalid quantity");
         require(product.quantity > 0, "product oos");
         require(product.quantity >= quantity, "insufficient stock");
-        require(
-            quantity * product.price * 10**18 <= msg.value,
-            "insufficient funds"
-        );
+        require(quantity * product.price <= msg.value, "insufficient funds");
 
         product.quantity -= quantity;
         _catalog[productCode] = product;
@@ -139,7 +141,7 @@ contract Market is IMarket, AccessControl {
         external
         override
         isAdmin
-        productNotExist(productCode)
+        productExist(productCode)
     {
         Product memory product = _catalog[productCode];
 
@@ -153,7 +155,7 @@ contract Market is IMarket, AccessControl {
         string memory productCode,
         uint256 quantity,
         bool forced
-    ) external override isAdmin productNotExist(productCode) {
+    ) external override isAdmin productExist(productCode) {
         Product memory product = _catalog[productCode];
 
         if (forced == true) {
@@ -170,11 +172,10 @@ contract Market is IMarket, AccessControl {
         external
         view
         override
+        productExist(productCode)
         returns (Product memory)
     {
         Product memory product = _catalog[productCode];
-
-        require(product.exists == true, "product dne");
 
         return product;
     }
