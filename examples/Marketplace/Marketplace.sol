@@ -1,3 +1,9 @@
+// SPDX-License-Identifier: MIT
+
 /**
-    Base setup for an NFT marketplace
+    NFT Marketplace
  */
+
+pragma solidity ^0.8.0;
+
+contract Marketplace {}
