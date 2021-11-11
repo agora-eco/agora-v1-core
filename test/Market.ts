@@ -1,5 +1,5 @@
 /*
-[Alice, Bob] = [Wallet 1, Wallet 2]
+[alice, bob]: Signer[] = [Wallet 1, Wallet 2]
 
 Alice creates store ✔
 Bob purchases product X
@@ -24,130 +24,139 @@ Bob purchases product ✔
 
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+import { Signer } from "ethers";
+import { Market } from "../src/Types/Market";
 
 describe("Market", () => {
-	let accounts;
-	let Market, market;
+	let accounts: Signer[];
+	let market: Market;
+	let alice: Signer, bob: Signer;
 
-	before(async () => {
-		accounts = await ethers.getSigners();
-		Market = await ethers.getContractFactory("Market");
-		market = await Market.deploy("RBM", "Rich Boy Market");
+	beforeEach(async () => {
+		[alice, bob] = await ethers.getSigners();
 	});
 
-	it("Store Creation", async () => {
-		const [alice, bob] = accounts;
-		const validCreateProductTxn = await market
-			.connect(alice)
-			.create("MS", "Milkshake", 0.1, 1);
-		await validCreateProductTxn.wait();
+	describe("Deploy market", () => {
+		it("deploy", async () => {
+			const Market = await ethers.getContractFactory("Market");
+			market = await Market.deploy("RBM", "Rich Boy Market");
+		});
+	});
 
-		try {
-			const invalidCreateProductTxn = await market
-				.connect(bob)
-				.create("BMS", "Bad Milkshake", 0.1, 1);
-			await invalidCreateProductTxn.wait();
-		} catch (error) {
-			expect(error.message).to.equal(
-				"VM Exception while processing transaction: reverted with reason string: 'not owner'"
+	describe("Establish catalog", () => {
+		it("owner create product", async () => {
+			const validCreateProductTxn = await market
+				.connect(alice)
+				.create("MS", "Milkshake", (1 * 10 ** 17).toString(), 1);
+			await validCreateProductTxn.wait();
+		});
+
+		it("non-owner create product", async () => {
+			await expect(
+				market
+					.connect(bob)
+					.create(
+						"BMS",
+						"Bad Milkshake",
+						(1 * 10 ** 17).toString(),
+						1
+					)
+			).to.be.revertedWith("must be admin");
+		});
+	});
+
+	describe("Inspect catalog", () => {
+		it("valid item lookup", async () => {
+			await expect(market.inspectItem("MS")).to.eql([
+				true, // exists
+				(1 * 10 ** 17).toString(), // price
+				"Milkshake", // name
+				1, // quantity
+				alice, // owner
+			]);
+		});
+
+		it("invalid item lookup", async () => {
+			await expect(market.inspectItem("BMS")).to.be.revertedWith(
+				"product dne"
 			);
-		}
+		});
 	});
 
-	it("Catalog Inspection", async () => {
-		const [alice, bob] = accounts;
-
-		expect(await market.inspect("MS")).to.eql([
-			true, // exists
-			ethers.BigNumber.from(0.1), // price
-			"Milkshake", // name
-			1, // quantity
-		]);
-
-		try {
-			await market.inspect("BMS");
-		} catch (error) {
-			expect(error.message).to.equal(
-				"VM Exception while processing transaction: reverted with reason string: 'product dne'"
-			);
-		}
-	});
-
-	it("Purchase", async () => {
-		const [alice, bob] = accounts;
-
-		try {
-			const bobPurchaseTxn = await market
-				.connect(bob)
-				.purchase("MS", 10, {
+	/*
+	describe("Purchase item", () => {
+		//purchase excess stock
+		it('purchase excess stock', async () => {
+			await expect(
+				market.connect(bob).purchase("MS", 10, {
 					value: (10 * 0.1 * 10 ** 18).toString(),
-				});
-			await bobPurchaseTxn.wait();
-		} catch (error) {
-			expect(error.message).to.equal(
-				"VM Exception while processing transaction: reverted with reason string: 'insufficient stock'"
-			);
-		}
+				})
+			).to.be.revertedWith("insufficient stock");
+		})
 
-		try {
+		it('purchase w/ insufficient value', async () => {
+			await expect(
+				market.connect(bob).purchase("MS", 1, {
+					value: 0,
+				})
+			).to.be.revertedWith("insufficient funds");
+		})
+
+		it('valid item purchase', async () => {
 			const bobPurchaseTxn = await market.connect(bob).purchase("MS", 1, {
-				value: 0,
+				value: (0.1 * 10 ** 18).toString(),
 			});
 			await bobPurchaseTxn.wait();
-		} catch (error) {
-			expect(error.message).to.equal(
-				"VM Exception while processing transaction: reverted with reason string: 'insufficient funds'"
-			);
-		}
-
-		const bobPurchaseTxn = await market.connect(bob).purchase("MS", 1, {
-			value: (0.1 * 10 ** 18).toString(),
 		});
-		await bobPurchaseTxn.wait();
 
-		expect(await market.inspect("MS")).to.eql([
-			true, // exists
-			ethers.BigNumber.from(0.1), // price
-			"Milkshake", // name
-			0, // quantity
-		]);
+		it('decrease stock', async () => {
+		await expect(market.inspectItem("MS")).to.eql([
+				true, // exists
+				(1 * 10 ** 17).toString(), // price
+				"Milkshake", // name
+				0, // quantity
+				alice, // owner
+			]);
+		});
+	});
 
 		// check for funds decreasing
 
-		try {
-			const bobPurchaseTxn2 = await market
-				.connect(bob)
-				.purchase("MS", 1, {
+		it('purchase out of stock item', async () => {
+			const bobPurchaseTxn = market.connect(bob).purchase("MS", 1, {
 					value: 0,
-				});
-			await bobPurchaseTxn2.wait();
-		} catch (error) {
-			expect(error.message).to.equal(
-				"VM Exception while processing transaction: reverted with reason string: 'product oos'"
-			);
-		}
-	});
+				})
+			await expect(
+				await bobPurchaseTxn.wait()
+			).to.be.revertedWith("product oos");
+		});
+	})
+	})
 
 	it("Restock", async () => {
-		try {
-			const bobRestockTxn = await market
-				.connect(bob)
-				.restock("MS", 10, true);
-			await bobRestockTxn.wait();
-		} catch (error) {
-			expect(error.message).to.equal(
-				"VM Exception while processing transaction: reverted with reason string: 'not owner'"
-			);
-		}
+		const [alice, bob]: Signer[] = accounts;
 
-		const aliceRestockTxn = await market.restock("MS", 5);
+		//non-owner restock"
+		await expect(
+			market.connect(bob)["restock(string,uint256,bool)"]("MS", 10, true)
+		).to.be.revertedWith("must be admin");
+
+		//owner restock"
+		const aliceRestockTxn = await market["restock(string,uint256)"](
+			"MS",
+			5
+		);
 		await aliceRestockTxn.wait();
 
-		expect(await market.inspect("MS")).to.eql([
-			true, // exists
-			ethers.BigNumber.from(0.1), // price
-			"Milkshake", // name
-			5, // quantity
-		]);
-	});
+		//item stock increase"
+		market.inspectItem("MS").then((item) => {
+			expect(item).to.eql([
+				true, // exists
+				(1 * 10 ** 17).toString(), // price
+				"Milkshake", // name
+				5, // quantity
+				alice, // owner
+			]);
+		});
+	});*/
 });
