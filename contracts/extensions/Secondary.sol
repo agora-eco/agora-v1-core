@@ -84,13 +84,13 @@ contract Secondary is Market {
         _listings[listingId] = listing;
     }
 
-    function purchase(uint256 listingId) external payable isActive {
+    function purchase(uint256 listingId) external payable virtual isActive {
         Listing memory listing = _listings[listingId];
         require(listing.exists == true, "listing dne");
         require(listing.owner != msg.sender, "owner");
         require(listing.active == true, "listing inactive");
         require(listing.settled == false, "listing settled");
-        require(listing.price * 10**18 <= msg.value, "insufficient funds");
+        require(listing.price <= msg.value, "insufficient funds");
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100)); // value * (marketplaceFee / 100)
         payable(listing.owner).transfer(msg.value - marketCut);
