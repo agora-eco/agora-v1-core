@@ -51,7 +51,7 @@ describe("Market", () => {
 			await aliceCreateProductTxn.wait();
 		});
 
-		it("non-owner create product", async () => {
+		it("disallow non-owner create product", async () => {
 			const bobCreateProductTxn = market
 				.connect(bob)
 				.create("BMS", "Bad Milkshake", (1 * 10 ** 17).toString(), 1);
