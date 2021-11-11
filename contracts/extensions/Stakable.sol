@@ -79,7 +79,7 @@ contract Stakable is Secondary, Treasury {
 
     function calculateSplit(address shareHolder)
         private
-        pure
+        view
         returns (uint256)
     {
         require(_shareHolders[shareHolder].count > 0, "invalid amount");
@@ -117,6 +117,7 @@ contract Stakable is Secondary, Treasury {
     function purchase(string memory productCode, uint256 quantity)
         external
         payable
+        virtual
         override
         productNotExist(productCode)
         isActive
@@ -127,7 +128,7 @@ contract Stakable is Secondary, Treasury {
         require(product.quantity > 0, "product oos");
         require(product.quantity >= quantity, "insufficient stock");
         require(
-            (product.price * 10**18).mul(quantity) <= msg.value,
+            (product.price).mul(quantity) <= msg.value,
             "insufficient funds"
         );
 
@@ -145,13 +146,19 @@ contract Stakable is Secondary, Treasury {
         );
     }
 
-    function purchase(uint256 listingId) external payable override isActive {
+    function purchase(uint256 listingId)
+        external
+        payable
+        virtual
+        override
+        isActive
+    {
         Listing memory listing = _listings[listingId];
         require(listing.exists == true, "listing dne");
         require(listing.owner != msg.sender, "owner");
         require(listing.active == true, "listing inactive");
         require(listing.settled == false, "listing settled");
-        require(listing.price * 10**18 <= msg.value, "insufficient funds");
+        require(listing.price <= msg.value, "insufficient funds");
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100)); // value * (marketplaceFee / 100)
         payable(listing.owner).transfer(msg.value - marketCut);
