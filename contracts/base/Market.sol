@@ -38,21 +38,21 @@ contract Market is IMarket, AccessControl {
     }
 
     modifier isAdmin() {
-        require(hasRole(ADMIN_ROLE, msg.sender), "must be admin");
+        require(hasRole(ADMIN_ROLE, _msgSender()), "must be admin");
         _;
     }
 
     constructor(string memory _symbol, string memory _name) {
         symbol = _symbol;
         name = _name;
-        owner = msg.sender;
-        _setupRole(ADMIN_ROLE, msg.sender);
+        owner = _msgSender();
+        _setupRole(ADMIN_ROLE, _msgSender());
 
-        if (msg.sender != tx.origin) {
+        /* if (msg.sender != tx.origin) {
             _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
-        }
+        }*/
 
-        emit Establish(_symbol, _name, tx.origin);
+        emit Establish(_symbol, _name, _msgSender());
     }
 
     function manageRole(address _address, bool state) external {
@@ -78,10 +78,10 @@ contract Market is IMarket, AccessControl {
             price,
             productName,
             quantity,
-            msg.sender
+            _msgSender()
         );
 
-        emit Create(productCode, name, price, quantity, msg.sender);
+        emit Create(productCode, name, price, quantity, _msgSender());
     }
 
     function setCatalogUri(string memory _catalogUri)
@@ -102,10 +102,10 @@ contract Market is IMarket, AccessControl {
             price,
             productName,
             _catalog[productCode].quantity,
-            msg.sender
+            _msgSender()
         );
 
-        emit Adjust(productCode, name, price, msg.sender);
+        emit Adjust(productCode, name, price, _msgSender());
     }
 
     function purchase(string memory productCode, uint256 quantity)
@@ -133,7 +133,7 @@ contract Market is IMarket, AccessControl {
             product.name,
             quantity,
             product.price * quantity,
-            tx.origin
+            _msgSender()
         );
     }
 
@@ -148,7 +148,7 @@ contract Market is IMarket, AccessControl {
         product.quantity += quantity;
         _catalog[productCode] = product;
 
-        emit Restock(productCode, product.name, quantity, false, msg.sender);
+        emit Restock(productCode, product.name, quantity, false, _msgSender());
     }
 
     function restock(
@@ -165,7 +165,7 @@ contract Market is IMarket, AccessControl {
         }
         _catalog[productCode] = product;
 
-        emit Restock(productCode, product.name, quantity, forced, msg.sender);
+        emit Restock(productCode, product.name, quantity, forced, _msgSender());
     }
 
     function inspectItem(string calldata productCode)
