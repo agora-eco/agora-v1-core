@@ -8,3 +8,4 @@ artifacts
 .env
 package-lock.json
 src/types
+secret.json
