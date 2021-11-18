@@ -82,7 +82,7 @@ contract Market is IMarket, AccessControl {
             _msgSender()
         );
 
-        emit Create(productCode, name, price, quantity, _msgSender());
+        emit Create(productCode, productName, price, quantity, _msgSender());
     }
 
     function setCatalogUri(string memory _catalogUri)
@@ -106,7 +106,7 @@ contract Market is IMarket, AccessControl {
             _msgSender()
         );
 
-        emit Adjust(productCode, name, price, _msgSender());
+        emit Adjust(productCode, productName, price, _msgSender());
     }
 
     function purchase(string memory productCode, uint256 quantity)
