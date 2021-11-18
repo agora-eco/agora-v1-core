@@ -46,6 +46,7 @@ contract Market is IMarket, AccessControl {
         symbol = _symbol;
         name = _name;
         owner = _msgSender();
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(ADMIN_ROLE, _msgSender());
 
         /* if (msg.sender != tx.origin) {
@@ -97,7 +98,7 @@ contract Market is IMarket, AccessControl {
         string memory productName,
         uint256 price
     ) external override isAdmin productExist(productCode) {
-        _catalog[productCode] = Product(
+        _catalog[productCode] = Product( // change .price
             true,
             price,
             productName,

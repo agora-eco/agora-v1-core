@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "hardhat test",
-		"compile": "hardhat compile"
+		"compile": "hardhat compile",
+		"deploy": "hardhat run scripts/init-deploy.js --network mumbai"
 	},
 	"repository": {
 		"type": "git",
