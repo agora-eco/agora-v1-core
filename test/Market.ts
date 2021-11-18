@@ -43,6 +43,32 @@ describe("Market", () => {
 		});
 	});
 
+	describe("Multirole", () => {
+		it("grant", async () => {
+			const bobAddress = await bob.getAddress();
+			const aliceGrantBobTxn = await market
+				.connect(alice)
+				.manageRole(bobAddress, true);
+			await aliceGrantBobTxn.wait();
+
+			const adminRole = await market.ADMIN_ROLE();
+			const bobIsAdmin = await market.hasRole(adminRole, bobAddress);
+			expect(bobIsAdmin).to.equal(true);
+		});
+
+		it("reove", async () => {
+			const bobAddress = await bob.getAddress();
+			const aliceGrantBobTxn = await market
+				.connect(alice)
+				.manageRole(bobAddress, false);
+			await aliceGrantBobTxn.wait();
+
+			const adminRole = await market.ADMIN_ROLE();
+			const bobIsAdmin = await market.hasRole(adminRole, bobAddress);
+			expect(bobIsAdmin).to.equal(false);
+		});
+	});
+
 	describe("Establish catalog", () => {
 		it("owner create product", async () => {
 			const aliceCreateProductTxn = await market
