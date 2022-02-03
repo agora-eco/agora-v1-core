@@ -8,17 +8,34 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import {IMarket} from "./interfaces/IMarket.sol";
 
+/**
+ * @dev Foundation of a market standard.
+ */
 contract Market is IMarket, AccessControl {
+    // Admin role
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
+    // Market owner. Original deployer of the market and super admin
     address public owner;
+
+    // Market name
     string public name;
+
+    // Market symbol
     string public symbol;
+
+    // Market catalog URI used for offchain purposes. Where market metadata exists
     string public catalogUri;
+
+    // Market paused
     bool public paused;
+
+    // Mapping from string of product codes to Product struct
     mapping(string => Product) internal _catalog;
 
-    // pause event
-
+    /**
+     * @dev Check if product does not exist in market catalog
+     */
     modifier productNotExist(string memory productCode) {
         require(
             _catalog[productCode].exists == false,
@@ -27,21 +44,34 @@ contract Market is IMarket, AccessControl {
         _;
     }
 
+    /**
+     * @dev Check if product exists in market catalog
+     */
     modifier productExist(string memory productCode) {
         require(_catalog[productCode].exists == true, "product dne");
         _;
     }
 
+    /**
+     * @dev Check if market is active
+     */
     modifier isActive() {
         require(paused == false, "market is paused");
         _;
     }
 
+    /**
+     * @dev Check if txn origin is of admin role
+     */
     modifier isAdmin() {
         require(hasRole(ADMIN_ROLE, _msgSender()), "must be admin");
         _;
     }
 
+    /**
+     * @dev Initalizes the market by setting a `symbol` and `name` to the market
+     * Assigns owner to market and sets up roles
+     */
     constructor(string memory _symbol, string memory _name) {
         symbol = _symbol;
         name = _name;
@@ -56,6 +86,9 @@ contract Market is IMarket, AccessControl {
         emit Establish(_symbol, _name, _msgSender());
     }
 
+    /**
+     * @dev Assign and revoke role from `address` with action dependent on `state`
+     */
     function manageRole(address _address, bool state) external {
         if (state) {
             grantRole(ADMIN_ROLE, _address);
@@ -64,10 +97,18 @@ contract Market is IMarket, AccessControl {
         }
     }
 
+    /**
+     * @dev See {IMarket-pause}
+     */
     function pause(bool state) external override isAdmin {
         paused = state;
+
+        emit Pause(state, _msgSender());
     }
 
+    /**
+     * @dev See {IMarket-create}
+     */
     function create(
         string memory productCode,
         string memory productName,
@@ -85,6 +126,9 @@ contract Market is IMarket, AccessControl {
         emit Create(productCode, productName, price, quantity, _msgSender());
     }
 
+    /**
+     * @dev See {IMarket-setCatalogUri}
+     */
     function setCatalogUri(string memory _catalogUri)
         external
         override
@@ -93,6 +137,9 @@ contract Market is IMarket, AccessControl {
         catalogUri = _catalogUri;
     }
 
+    /**
+     * @dev See {IMarket-adjust}
+     */
     function adjust(
         string memory productCode,
         string memory productName,
@@ -109,6 +156,9 @@ contract Market is IMarket, AccessControl {
         emit Adjust(productCode, productName, price, _msgSender());
     }
 
+    /**
+     * @dev See {IMarket-purchase}
+     */
     function purchase(string memory productCode, uint256 quantity)
         external
         payable
@@ -138,6 +188,9 @@ contract Market is IMarket, AccessControl {
         );
     }
 
+    /**
+     * @dev See {IMarket-restock}
+     */
     function restock(string memory productCode, uint256 quantity)
         external
         override
@@ -152,6 +205,9 @@ contract Market is IMarket, AccessControl {
         emit Restock(productCode, product.name, quantity, false, _msgSender());
     }
 
+    /**
+     * @dev See {IMarket-restock}
+     */
     function restock(
         string memory productCode,
         uint256 quantity,
@@ -169,6 +225,9 @@ contract Market is IMarket, AccessControl {
         emit Restock(productCode, product.name, quantity, forced, _msgSender());
     }
 
+    /**
+     * @dev See {IMarket-inspectItem}
+     */
     function inspectItem(string calldata productCode)
         external
         view

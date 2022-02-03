@@ -31,6 +31,7 @@ contract Stakable is Secondary, Treasury {
         uint256 earned;
         uint256 balance;
     }
+
     struct ShareListing {
         bool exists;
         bool active;
