@@ -1,34 +1,12 @@
-/*
-[alice, bob]: Signer[] = [Wallet 1, Wallet 2]
-
-Alice creates store ✔
-Bob purchases product X
-
-Alice creates product w/ stock 1 ✔
-Bob creates product X
-
-Bob purchases product ✔
-Alice funds rise ✔
-Bobs funds decrease ✔
-Stock drops 1 ✔
-
-Product stock = 0 ✔
-bob purchases product X
-Bob restocks X
-Alice restocks ✔
-Product stock reflects ✔
-
-Bob purchases product ✔
-
-*/
-
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 import { Signer } from "ethers";
+import { MarketFactory } from "../src/Types/MarketFactory";
 import { Market } from "../src/Types/Market";
 
-describe("Market", () => {
+describe("MarketFactory", () => {
 	let accounts: Signer[];
+	let marketFactory: MarketFactory;
 	let market: Market;
 	let alice: Signer, bob: Signer;
 
@@ -36,10 +14,32 @@ describe("Market", () => {
 		[alice, bob] = await ethers.getSigners();
 	});
 
-	describe("Deploy market", () => {
+	describe("Deploy MarketFactory", () => {
 		it("deploy", async () => {
-			const Market = await ethers.getContractFactory("Market");
-			market = await Market.deploy("RBM", "Rich Boy Market");
+			const MarketFactory = await ethers.getContractFactory(
+				"MarketFactory"
+			);
+			marketFactory = await MarketFactory.deploy(
+				await alice.getAddress()
+			);
+		});
+	});
+
+	describe("Manage Market", () => {
+		it("Deploy", async () => {
+			const createMarketTxn = await marketFactory
+				.connect(alice)
+				.deployMarket("TFM", "TestFactoryMarket");
+			await createMarketTxn.wait();
+		});
+
+		it("Retrieve", async () => {
+			market = await ethers.getContractAt(
+				"Market",
+				await marketFactory.marketRegistry(0)
+			);
+
+			expect(await market.owner()).to.equal(await alice.getAddress());
 		});
 	});
 
@@ -56,7 +56,7 @@ describe("Market", () => {
 			expect(bobIsAdmin).to.equal(true);
 		});
 
-		it("revoke", async () => {
+		it("reove", async () => {
 			const bobAddress = await bob.getAddress();
 			const aliceGrantBobTxn = await market
 				.connect(alice)

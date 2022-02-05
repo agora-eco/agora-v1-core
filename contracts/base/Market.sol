@@ -75,15 +75,15 @@ contract Market is IMarket, AccessControl {
     constructor(string memory _symbol, string memory _name) {
         symbol = _symbol;
         name = _name;
-        owner = _msgSender();
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setupRole(ADMIN_ROLE, _msgSender());
+        owner = tx.origin;
+        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
+        _setupRole(ADMIN_ROLE, tx.origin);
 
         /* if (msg.sender != tx.origin) {
             _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
         }*/
 
-        emit Establish(_symbol, _name, _msgSender());
+        emit Establish(_symbol, _name, tx.origin);
     }
 
     /**
