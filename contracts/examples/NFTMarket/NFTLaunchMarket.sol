@@ -6,15 +6,26 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+<<<<<<< Updated upstream:contracts/examples/NFTMarket/NFTSaleMarket.sol
 //import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol"; // replace with custom implementation
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+=======
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol"; // replace with custom implementation
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol"; // replace with custom implementation
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+>>>>>>> Stashed changes:contracts/examples/NFTMarket/NFTLaunchMarket.sol
 import "../../base/Market.sol";
 
 /**
  * @dev Foundation of a market standard.
  */
+<<<<<<< Updated upstream:contracts/examples/NFTMarket/NFTSaleMarket.sol
 contract NFTSaleMarket is Market, ERC721EnumerableUpgradeable {
+=======
+contract NFTLaunchMarket is Initializable, Market, ERC721EnumerableUpgradeable {
+    uint256 private count;
+>>>>>>> Stashed changes:contracts/examples/NFTMarket/NFTLaunchMarket.sol
     uint256 public maxPerOwner;
     string private _baseTokenURI;
 
