@@ -81,15 +81,29 @@ contract Market is IMarket, Initializable, AccessControlUpgradeable {
      * @dev Initalizes the market by setting a `symbol` and `name` to the market
      * Assigns owner to market and sets up roles
      */
-    function initialize(string calldata _symbol, string calldata _name)
+    function initialize(string memory _symbol, string memory _name)
         public
         virtual
+        initializer
+    {
+        __Market_init(_symbol, _name);
+    }
+
+    function __Market_init(string memory _symbol, string memory _name)
+        internal
+        initializer
+    {
+        __AccessControl_init_unchained();
+        __Market_init_unchained(_symbol, _name);
+    }
+
+    function __Market_init_unchained(string memory _symbol, string memory _name)
+        internal
         initializer
     {
         symbol = _symbol;
         name = _name;
         owner = tx.origin;
-        __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
         _setupRole(ADMIN_ROLE, tx.origin);
 
