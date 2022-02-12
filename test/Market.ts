@@ -39,7 +39,12 @@ describe("Market", () => {
 	describe("Deploy market", () => {
 		it("deploy", async () => {
 			const Market = await ethers.getContractFactory("Market");
-			market = await Market.deploy("RBM", "Rich Boy Market");
+			market = await Market.deploy();
+			const initializeTxn = await market.initialize(
+				"RBM",
+				"Rich Boy Market"
+			);
+			await initializeTxn.wait();
 		});
 	});
 
@@ -74,14 +79,24 @@ describe("Market", () => {
 		it("owner create product", async () => {
 			const aliceCreateProductTxn = await market
 				.connect(alice)
-				.create("MS", "Milkshake", (1 * 10 ** 17).toString(), 1);
+				["create(string,string,uint256,uint256)"](
+					"MS",
+					"Milkshake",
+					(1 * 10 ** 17).toString(),
+					1
+				);
 			await aliceCreateProductTxn.wait();
 		});
 
 		it("disallow non-owner create product", async () => {
 			const bobCreateProductTxn = market
 				.connect(bob)
-				.create("BMS", "Bad Milkshake", (1 * 10 ** 17).toString(), 1);
+				["create(string,string,uint256,uint256)"](
+					"BMS",
+					"Bad Milkshake",
+					(1 * 10 ** 17).toString(),
+					1
+				);
 			await expect(bobCreateProductTxn).to.be.revertedWith(
 				"must be admin"
 			);
@@ -97,6 +112,7 @@ describe("Market", () => {
 				"Milkshake", // name
 				ethers.BigNumber.from(1), // quantity
 				await alice.getAddress(), // owner
+				false, // locked
 			]);
 		});
 
@@ -139,6 +155,7 @@ describe("Market", () => {
 				"Milkshake",
 				ethers.BigNumber.from(0),
 				await alice.getAddress(),
+				false,
 			]);
 		});
 
@@ -174,6 +191,7 @@ describe("Market", () => {
 				"Milkshake",
 				ethers.BigNumber.from(5),
 				await alice.getAddress(),
+				false,
 			]);
 		});
 	});
