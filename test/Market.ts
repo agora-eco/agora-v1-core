@@ -49,6 +49,7 @@ describe("Market", () => {
 			const aliceGrantBobTxn = await market
 				.connect(alice)
 				.manageRole(bobAddress, true);
+
 			await aliceGrantBobTxn.wait();
 
 			const adminRole = await market.ADMIN_ROLE();
@@ -56,7 +57,7 @@ describe("Market", () => {
 			expect(bobIsAdmin).to.equal(true);
 		});
 
-		it("reove", async () => {
+		it("revoke", async () => {
 			const bobAddress = await bob.getAddress();
 			const aliceGrantBobTxn = await market
 				.connect(alice)
