@@ -5,7 +5,7 @@ import { MarketFactory } from "../src/Types/MarketFactory";
 import { Market } from "../src/Types/Market";
 import { NFTLaunchMarket } from "../src/Types/NFTLaunchMarket";
 import DefaultMarketAbi from "../artifacts/contracts/base/Market.sol/Market.json";
-import NFTSaleAbi from "../artifacts/contracts/examples/NFTMarket/NFTLaunchMarket.sol/NFTLaunchMarket.json";
+import NFTLaunchAbi from "../artifacts/contracts/examples/NFTMarket/NFTLaunchMarket.sol/NFTLaunchMarket.json";
 
 describe("MarketFactory", () => {
 	let accounts: Signer[];
@@ -56,14 +56,14 @@ describe("MarketFactory", () => {
 	});
 
 	describe("Manage Market", () => {
-		it("Deploy NFT Sale Market", async () => {
+		it("Deploy NFT Launch Market", async () => {
 			const iface = new ethers.utils.Interface([
 				"function initialize(string _symbol, string _name, uint256 _maxPerOwner)",
 			]);
 			const createMarketTxn = await marketFactory
 				.connect(bob)
 				.deployMarket(
-					"NFT Sale",
+					"NFT Launch",
 					iface.encodeFunctionData("initialize", [
 						"GFM",
 						"GweiFace Market",
@@ -77,7 +77,7 @@ describe("MarketFactory", () => {
 		it("Retrieve", async () => {
 			const newMarketAddress = await marketFactory.markets(0);
 			nftLaunchMarket = await ethers.getContractAt(
-				"NFTSaleMarket",
+				"NFTLaunchMarket",
 				newMarketAddress
 			);
 
