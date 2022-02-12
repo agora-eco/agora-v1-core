@@ -49,6 +49,7 @@ describe("Market", () => {
 			const aliceGrantBobTxn = await market
 				.connect(alice)
 				.manageRole(bobAddress, true);
+
 			await aliceGrantBobTxn.wait();
 
 			const adminRole = await market.ADMIN_ROLE();

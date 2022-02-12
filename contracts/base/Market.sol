@@ -6,12 +6,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IMarket} from "./interfaces/IMarket.sol";
 
 /**
  * @dev Foundation of a market standard.
  */
-contract Market is IMarket, AccessControl {
+contract Market is IMarket, AccessControl, Initializable {
     // Admin role
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
@@ -72,18 +73,32 @@ contract Market is IMarket, AccessControl {
      * @dev Initalizes the market by setting a `symbol` and `name` to the market
      * Assigns owner to market and sets up roles
      */
-    constructor(string memory _symbol, string memory _name) {
+
+    /* constructor(string memory _symbol, string memory _name) {
         symbol = _symbol;
         name = _name;
         owner = tx.origin;
         _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
         _setupRole(ADMIN_ROLE, tx.origin);
 
-        /* if (msg.sender != tx.origin) {
-            _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
-        }*/
+        // if (msg.sender != tx.origin) {
+        //    _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
+        //}
 
         emit Establish(_symbol, _name, tx.origin);
+    } */
+
+    function initialize(string calldata _symbol, string calldata _name)
+        external
+        initializer
+    {
+        symbol = _symbol;
+        name = _name;
+        owner = tx.origin;
+        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
+        _setupRole(ADMIN_ROLE, tx.origin);
+
+        emit Establish(_symbol, _name, owner);
     }
 
     /**

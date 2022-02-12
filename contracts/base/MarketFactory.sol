@@ -3,6 +3,10 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
+import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
+import "hardhat/console.sol";
+
 import "./Market.sol";
 
 contract MarketFactory {
@@ -10,23 +14,64 @@ contract MarketFactory {
     using Strings for string;
 
     address public paymentProxyAddress;
-    address[] public marketRegistry;
+    address[] public markets;
+    mapping(address => string) public marketRegistry;
     mapping(address => bool) internal _registered;
     mapping(address => bool) internal _verified;
+    mapping(string => UpgradeableBeacon) internal _extensionRegistry;
+
+    /* struct MarketParams {
+        string symbol;
+        string name;
+    } */
+
+    /*
+    struct MarketEntry {
+        string extensionName;
+        address location;
+    } */
 
     constructor(address _paymentProxyAddress) {
         paymentProxyAddress = _paymentProxyAddress;
     }
 
-    function deployMarket(string memory _symbol, string memory _name)
-        public
+    function addExtension(string calldata extensionName, address logic)
+        external
+    {
+        _extensionRegistry[extensionName] = new UpgradeableBeacon(logic);
+    }
+
+    function upgradeExtension(string calldata extensionName, address logic)
+        external
+    {
+        _extensionRegistry[extensionName].upgradeTo(logic);
+    }
+
+    function deployMarket(string calldata extensionName, bytes calldata data)
+        external
         returns (address)
     {
-        Market market = new Market(_symbol, _name);
+        //MarketParams memory params = MarketParams(symbol, name);
+        BeaconProxy proxy = new BeaconProxy(
+            address(_extensionRegistry[extensionName]),
+            /* abi.encodeWithSelector(
+                Market(address(0)).initialize.selector,
+                "SMB",
+                "Symbol"
+            ) */
+            data
+            //abi.encodeWithSignature("constructor(string,string)", symbol, name)
+        );
+
+        markets.push(address(proxy));
+        marketRegistry[address(proxy)] = extensionName;
+
+        return address(proxy);
+        /* Market market = new Market(_symbol, _name);
         address _marketAddress = address(market);
         _registered[_marketAddress] = true;
-        marketRegistry.push(_marketAddress);
-        return _marketAddress;
+        marketRegistry[_marketAddress] = _extension;
+        return _marketAddress; */
     }
 
     function disableMarket(address _market) public {

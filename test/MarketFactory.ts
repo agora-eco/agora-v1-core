@@ -3,11 +3,13 @@ const { ethers } = require("hardhat");
 import { Signer } from "ethers";
 import { MarketFactory } from "../src/Types/MarketFactory";
 import { Market } from "../src/Types/Market";
+import DefaultMarketAbi from "../artifacts/contracts/base/Market.sol/Market.json";
 
 describe("MarketFactory", () => {
 	let accounts: Signer[];
 	let marketFactory: MarketFactory;
 	let market: Market;
+	let market2: Market;
 	let alice: Signer, bob: Signer;
 
 	before(async () => {
@@ -25,26 +27,72 @@ describe("MarketFactory", () => {
 		});
 	});
 
+	describe("Initialize Proxies", () => {
+		it("Deploy Default", async () => {
+			const Market = await ethers.getContractFactory("Market");
+			market = await Market.deploy();
+		});
+
+		it("Add Factory Extension", async () => {
+			const addFactoryExtensionTx = await marketFactory
+				.connect(alice)
+				.addExtension("Default", market.address);
+			await addFactoryExtensionTx.wait();
+		});
+	});
+
 	describe("Manage Market", () => {
 		it("Deploy", async () => {
+			const iface = new ethers.utils.Interface([
+				"function initialize(string _symbol, string _name)",
+			]);
 			const createMarketTxn = await marketFactory
 				.connect(alice)
-				.deployMarket("TFM", "TestFactoryMarket");
+				.deployMarket(
+					"Default",
+					iface.encodeFunctionData("initialize", [
+						"TPM",
+						"Test Proxied Market",
+					])
+				);
+
+			await createMarketTxn.wait();
+		});
+
+		it("Deploy 2nd", async () => {
+			const iface = new ethers.utils.Interface([
+				"function initialize(string _symbol, string _name)",
+			]);
+			const createMarketTxn = await marketFactory
+				.connect(bob)
+				.deployMarket(
+					"Default",
+					iface.encodeFunctionData("initialize", [
+						"BM",
+						"Bob's Beacon'd Market",
+					])
+				);
+
 			await createMarketTxn.wait();
 		});
 
 		it("Retrieve", async () => {
-			market = await ethers.getContractAt(
-				"Market",
-				await marketFactory.marketRegistry(0)
-			);
+			const newMarketAddress = await marketFactory.markets(0);
+			market = await ethers.getContractAt("Market", newMarketAddress);
 
 			expect(await market.owner()).to.equal(await alice.getAddress());
+		});
+
+		it("Retrieve 2nd", async () => {
+			const newMarketAddress = await marketFactory.markets(1);
+			market2 = await ethers.getContractAt("Market", newMarketAddress);
+
+			expect(await market2.owner()).to.equal(await bob.getAddress());
 		});
 	});
 
 	describe("Multirole", () => {
-		it("grant", async () => {
+		it("Grant", async () => {
 			const bobAddress = await bob.getAddress();
 			const aliceGrantBobTxn = await market
 				.connect(alice)
@@ -56,7 +104,7 @@ describe("MarketFactory", () => {
 			expect(bobIsAdmin).to.equal(true);
 		});
 
-		it("reove", async () => {
+		it("Remove", async () => {
 			const bobAddress = await bob.getAddress();
 			const aliceGrantBobTxn = await market
 				.connect(alice)
@@ -69,15 +117,15 @@ describe("MarketFactory", () => {
 		});
 	});
 
-	describe("Establish catalog", () => {
-		it("owner create product", async () => {
+	describe("Establish Catalog", () => {
+		it("Owner Create Product", async () => {
 			const aliceCreateProductTxn = await market
 				.connect(alice)
 				.create("MS", "Milkshake", (1 * 10 ** 17).toString(), 1);
 			await aliceCreateProductTxn.wait();
 		});
 
-		it("disallow non-owner create product", async () => {
+		it("Disallow Non-owner Create Product", async () => {
 			const bobCreateProductTxn = market
 				.connect(bob)
 				.create("BMS", "Bad Milkshake", (1 * 10 ** 17).toString(), 1);
@@ -87,8 +135,8 @@ describe("MarketFactory", () => {
 		});
 	});
 
-	describe("Inspect catalog", () => {
-		it("valid item lookup", async () => {
+	describe("Inspect Catalog", () => {
+		it("Valid Item Lookup", async () => {
 			const milkshake = await market.inspectItem("MS");
 			await expect(milkshake).to.eql([
 				true, // exists
@@ -99,15 +147,15 @@ describe("MarketFactory", () => {
 			]);
 		});
 
-		it("invalid item lookup", async () => {
+		it("Invalid Item Lookup", async () => {
 			await expect(market.inspectItem("BMS")).to.be.revertedWith(
 				"product dne"
 			);
 		});
 	});
 
-	describe("Purchase item", () => {
-		it("invalidate excess stock purchase", async () => {
+	describe("Purchase Item", () => {
+		it("Invalidate Excess Stock Purchase", async () => {
 			const bobPurchaseTxn = market.connect(bob).purchase("MS", 10, {
 				value: (10 * 0.1 * 10 ** 18).toString(),
 			});
@@ -116,7 +164,7 @@ describe("MarketFactory", () => {
 			);
 		});
 
-		it("invalidate insufficient value purchase", async () => {
+		it("Invalidate Insufficient Value Purchase", async () => {
 			const bobPurchaseTxn = market.connect(bob).purchase("MS", 1, {
 				value: 0,
 			});
@@ -125,7 +173,7 @@ describe("MarketFactory", () => {
 			);
 		});
 
-		it("valid item purchase", async () => {
+		it("Valid Item Purchase", async () => {
 			const bobPurchaseTxn = await market.connect(bob).purchase("MS", 1, {
 				value: (0.1 * 10 ** 18).toString(),
 			});
@@ -143,7 +191,7 @@ describe("MarketFactory", () => {
 
 		// decreasing funds
 
-		it("invalidate out of stock item purchase", async () => {
+		it("Invalidate Out Of Stock Item Purchase", async () => {
 			const bobPurchaseTxn = market.connect(bob).purchase("MS", 1, {
 				value: 0,
 			});
@@ -152,14 +200,14 @@ describe("MarketFactory", () => {
 	});
 
 	describe("Restock", () => {
-		it("disallow non-owner restock", async () => {
+		it("Disallow Non-owner Restock", async () => {
 			const bobRestockTxn = market
 				.connect(bob)
 				["restock(string,uint256,bool)"]("MS", 10, true);
 			await expect(bobRestockTxn).to.be.revertedWith("must be admin");
 		});
 
-		it("owner restock", async () => {
+		it("Owner Restock", async () => {
 			const aliceRestockTxn = await market["restock(string,uint256)"](
 				"MS",
 				5
