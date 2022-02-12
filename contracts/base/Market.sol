@@ -5,14 +5,14 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IMarket} from "./interfaces/IMarket.sol";
 
 /**
  * @dev Foundation of a market standard.
  */
-contract Market is IMarket, AccessControl, Initializable {
+contract Market is IMarket, Initializable, AccessControlUpgradeable {
     // Admin role
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
@@ -20,10 +20,10 @@ contract Market is IMarket, AccessControl, Initializable {
     address public owner;
 
     // Market name
-    string public name;
+    string private name;
 
     // Market symbol
-    string public symbol;
+    string private symbol;
 
     // Market catalog URI used for offchain purposes. Where market metadata exists
     string public catalogUri;
@@ -56,6 +56,14 @@ contract Market is IMarket, AccessControl, Initializable {
     /**
      * @dev Check if market is active
      */
+    modifier productNotLocked(string memory productCode) {
+        require(_catalog[productCode].locked == false, "product is locked");
+        _;
+    }
+
+    /**
+     * @dev Check if market is active
+     */
     modifier isActive() {
         require(paused == false, "market is paused");
         _;
@@ -73,28 +81,15 @@ contract Market is IMarket, AccessControl, Initializable {
      * @dev Initalizes the market by setting a `symbol` and `name` to the market
      * Assigns owner to market and sets up roles
      */
-
-    /* constructor(string memory _symbol, string memory _name) {
-        symbol = _symbol;
-        name = _name;
-        owner = tx.origin;
-        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
-        _setupRole(ADMIN_ROLE, tx.origin);
-
-        // if (msg.sender != tx.origin) {
-        //    _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
-        //}
-
-        emit Establish(_symbol, _name, tx.origin);
-    } */
-
     function initialize(string calldata _symbol, string calldata _name)
-        external
+        public
+        virtual
         initializer
     {
         symbol = _symbol;
         name = _name;
         owner = tx.origin;
+        __AccessControl_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
         _setupRole(ADMIN_ROLE, tx.origin);
 
@@ -125,17 +120,31 @@ contract Market is IMarket, AccessControl, Initializable {
      * @dev See {IMarket-create}
      */
     function create(
+        string calldata productCode,
+        string calldata productName,
+        uint256 price,
+        uint256 quantity
+    ) external virtual override isAdmin productNotExist(productCode) {
+        create(productCode, productName, price, quantity, false);
+    }
+
+    /**
+     * @dev See {IMarket-create}
+     */
+    function create(
         string memory productCode,
         string memory productName,
         uint256 price,
-        uint256 quantity
-    ) external override isAdmin productNotExist(productCode) {
+        uint256 quantity,
+        bool locked
+    ) public isAdmin productNotExist(productCode) {
         _catalog[productCode] = Product(
             true,
             price,
             productName,
             quantity,
-            _msgSender()
+            _msgSender(),
+            locked
         );
 
         emit Create(productCode, productName, price, quantity, _msgSender());
@@ -144,8 +153,9 @@ contract Market is IMarket, AccessControl, Initializable {
     /**
      * @dev See {IMarket-setCatalogUri}
      */
-    function setCatalogUri(string memory _catalogUri)
+    function setCatalogUri(string calldata _catalogUri)
         external
+        virtual
         override
         isAdmin
     {
@@ -159,13 +169,20 @@ contract Market is IMarket, AccessControl, Initializable {
         string memory productCode,
         string memory productName,
         uint256 price
-    ) external override isAdmin productExist(productCode) {
+    )
+        external
+        override
+        isAdmin
+        productExist(productCode)
+        productNotLocked(productCode)
+    {
         _catalog[productCode] = Product( // change .price
             true,
             price,
             productName,
             _catalog[productCode].quantity,
-            _msgSender()
+            _msgSender(),
+            false
         );
 
         emit Adjust(productCode, productName, price, _msgSender());
@@ -174,7 +191,7 @@ contract Market is IMarket, AccessControl, Initializable {
     /**
      * @dev See {IMarket-purchase}
      */
-    function purchase(string memory productCode, uint256 quantity)
+    function purchase(string calldata productCode, uint256 quantity)
         external
         payable
         virtual
@@ -211,6 +228,7 @@ contract Market is IMarket, AccessControl, Initializable {
         override
         isAdmin
         productExist(productCode)
+        productNotLocked(productCode)
     {
         Product memory product = _catalog[productCode];
 
@@ -227,7 +245,13 @@ contract Market is IMarket, AccessControl, Initializable {
         string memory productCode,
         uint256 quantity,
         bool forced
-    ) external override isAdmin productExist(productCode) {
+    )
+        external
+        override
+        isAdmin
+        productExist(productCode)
+        productNotLocked(productCode)
+    {
         Product memory product = _catalog[productCode];
 
         if (forced == true) {
@@ -253,5 +277,21 @@ contract Market is IMarket, AccessControl, Initializable {
         Product memory product = _catalog[productCode];
 
         return product;
+    }
+
+    function setMarketName(string memory _name) internal isAdmin {
+        name = _name;
+    }
+
+    function setMarketSymbol(string memory _symbol) internal isAdmin {
+        symbol = _symbol;
+    }
+
+    function getMarketName() public view returns (string memory) {
+        return name;
+    }
+
+    function getMarketSymbol() public view returns (string memory) {
+        return symbol;
     }
 }

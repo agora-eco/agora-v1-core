@@ -64,6 +64,7 @@ interface IMarket {
         string name;
         uint256 quantity;
         address owner;
+        bool locked;
     }
 
     //function establish(string memory symbol, string memory name) external;

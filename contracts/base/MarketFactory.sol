@@ -20,17 +20,6 @@ contract MarketFactory {
     mapping(address => bool) internal _verified;
     mapping(string => UpgradeableBeacon) internal _extensionRegistry;
 
-    /* struct MarketParams {
-        string symbol;
-        string name;
-    } */
-
-    /*
-    struct MarketEntry {
-        string extensionName;
-        address location;
-    } */
-
     constructor(address _paymentProxyAddress) {
         paymentProxyAddress = _paymentProxyAddress;
     }
@@ -51,27 +40,17 @@ contract MarketFactory {
         external
         returns (address)
     {
-        //MarketParams memory params = MarketParams(symbol, name);
         BeaconProxy proxy = new BeaconProxy(
             address(_extensionRegistry[extensionName]),
-            /* abi.encodeWithSelector(
-                Market(address(0)).initialize.selector,
-                "SMB",
-                "Symbol"
-            ) */
             data
-            //abi.encodeWithSignature("constructor(string,string)", symbol, name)
         );
+        address proxyAddress = address(proxy);
 
-        markets.push(address(proxy));
-        marketRegistry[address(proxy)] = extensionName;
+        markets.push(proxyAddress);
+        marketRegistry[proxyAddress] = extensionName;
+        _registered[proxyAddress] = true;
 
-        return address(proxy);
-        /* Market market = new Market(_symbol, _name);
-        address _marketAddress = address(market);
-        _registered[_marketAddress] = true;
-        marketRegistry[_marketAddress] = _extension;
-        return _marketAddress; */
+        return proxyAddress;
     }
 
     function disableMarket(address _market) public {

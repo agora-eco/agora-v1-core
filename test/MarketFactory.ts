@@ -79,7 +79,6 @@ describe("MarketFactory", () => {
 		it("Retrieve", async () => {
 			const newMarketAddress = await marketFactory.markets(0);
 			market = await ethers.getContractAt("Market", newMarketAddress);
-
 			expect(await market.owner()).to.equal(await alice.getAddress());
 		});
 
@@ -121,14 +120,24 @@ describe("MarketFactory", () => {
 		it("Owner Create Product", async () => {
 			const aliceCreateProductTxn = await market
 				.connect(alice)
-				.create("MS", "Milkshake", (1 * 10 ** 17).toString(), 1);
+				["create(string,string,uint256,uint256)"](
+					"MS",
+					"Milkshake",
+					ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+					1
+				);
 			await aliceCreateProductTxn.wait();
 		});
 
 		it("Disallow Non-owner Create Product", async () => {
 			const bobCreateProductTxn = market
 				.connect(bob)
-				.create("BMS", "Bad Milkshake", (1 * 10 ** 17).toString(), 1);
+				["create(string,string,uint256,uint256)"](
+					"BMS",
+					"Bad Milkshake",
+					(0.1 * 10 ** 18).toString(),
+					1
+				);
 			await expect(bobCreateProductTxn).to.be.revertedWith(
 				"must be admin"
 			);
@@ -140,10 +149,11 @@ describe("MarketFactory", () => {
 			const milkshake = await market.inspectItem("MS");
 			await expect(milkshake).to.eql([
 				true, // exists
-				ethers.BigNumber.from((1 * 10 ** 17).toString()), // price
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()), // price
 				"Milkshake", // name
 				ethers.BigNumber.from(1), // quantity
 				await alice.getAddress(), // owner
+				false, // locked
 			]);
 		});
 
@@ -157,7 +167,7 @@ describe("MarketFactory", () => {
 	describe("Purchase Item", () => {
 		it("Invalidate Excess Stock Purchase", async () => {
 			const bobPurchaseTxn = market.connect(bob).purchase("MS", 10, {
-				value: (10 * 0.1 * 10 ** 18).toString(),
+				value: ethers.BigNumber.from((10 * 0.1 * 10 ** 18).toString()),
 			});
 			await expect(bobPurchaseTxn).to.be.revertedWith(
 				"insufficient stock"
@@ -175,17 +185,18 @@ describe("MarketFactory", () => {
 
 		it("Valid Item Purchase", async () => {
 			const bobPurchaseTxn = await market.connect(bob).purchase("MS", 1, {
-				value: (0.1 * 10 ** 18).toString(),
+				value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
 			});
 			await bobPurchaseTxn.wait();
 
 			const milkshake = await market.inspectItem("MS");
 			await expect(milkshake).to.eql([
 				true,
-				ethers.BigNumber.from((1 * 10 ** 17).toString()),
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
 				"Milkshake",
 				ethers.BigNumber.from(0),
 				await alice.getAddress(),
+				false,
 			]);
 		});
 
@@ -217,10 +228,11 @@ describe("MarketFactory", () => {
 			const milkshake = await market.inspectItem("MS");
 			expect(milkshake).to.eql([
 				true,
-				ethers.BigNumber.from((1 * 10 ** 17).toString()),
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
 				"Milkshake",
 				ethers.BigNumber.from(5),
 				await alice.getAddress(),
+				false,
 			]);
 		});
 	});
