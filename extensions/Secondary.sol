@@ -5,35 +5,18 @@
 
 pragma solidity ^0.8.0;
 
+import {ISecondaryMarket} from "../contracts/base/interfaces/ISecondaryMarket.sol";
 import {Market} from "../base/Market.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract Secondary is Market {
+contract Secondary is Market, ISecondaryMarket{
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
     Counters.Counter private _listingId;
     uint256 public marketplaceFee;
     mapping(uint256 => Listing) _listings;
-
-    struct Listing {
-        bool exists;
-        bool active;
-        bool settled;
-        string productCode;
-        string name;
-        uint256 price;
-        address owner;
-    }
-
-    event List(
-        string productCode,
-        string productName,
-        uint256 price,
-        uint256 listingId,
-        address indexed initiator
-    );
 
     // fee adjust event
 
