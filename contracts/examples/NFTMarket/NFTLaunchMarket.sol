@@ -83,6 +83,7 @@ contract NFTLaunchMarket is Initializable, Market, ERC721EnumerableUpgradeable {
         override
         productExist(productCode)
         isActive
+        guard(productCode, quantity)
     {
         Product memory product = _catalog[productCode];
 
