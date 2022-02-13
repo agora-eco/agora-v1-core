@@ -116,11 +116,25 @@ describe("MarketFactory", () => {
 	});
 
 	describe("Mint NFT", () => {
+		it("Mint Excess", async () => {
+			const mintNftTxn = nftLaunchMarket
+				.connect(alice)
+				.purchase("AGNFT", 3, {
+					value: ethers.BigNumber.from(
+						(0.18 * 3 * 10 ** 18).toString()
+					),
+				});
+
+			await expect(mintNftTxn).to.be.revertedWith("Exceeds maxPerOwner");
+		});
+
 		it("Mint", async () => {
 			const mintNftTxn = await nftLaunchMarket
 				.connect(alice)
 				.purchase("AGNFT", 2, {
-					value: ethers.BigNumber.from((0.36 * 10 ** 18).toString()),
+					value: ethers.BigNumber.from(
+						(0.18 * 2 * 10 ** 18).toString()
+					),
 				});
 
 			await mintNftTxn.wait();
