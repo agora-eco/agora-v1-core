@@ -16,7 +16,8 @@ contract Secondary is Market, ISecondaryMarket{
 
     Counters.Counter private _listingId;
     uint256 public marketplaceFee;
-    mapping(uint256 => Listing) _listings;
+    mapping (uint256 => Listing) _listings;
+    mapping (address => Product[]) _holdingsBook; // owner address => products own by owner
 
     function initialize(
         string memory _symbol,
