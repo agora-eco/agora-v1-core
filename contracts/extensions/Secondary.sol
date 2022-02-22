@@ -6,6 +6,7 @@
 pragma solidity ^0.8.0;
 
 import {ISecondaryMarket} from "../base/interfaces/ISecondaryMarket.sol";
+import {IMarket} from "../base/interfaces/IMarket.sol";
 import {Market} from "../base/Market.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -17,7 +18,7 @@ contract Secondary is Market, ISecondaryMarket{
     Counters.Counter private _listingId;
     uint256 public marketplaceFee;
     mapping (uint256 => Listing) _listings;
-    mapping (address => Product[]) _holdingsBook; // owner address => products own by owner
+    mapping (address => mapping(string => Product)) _holdingsBook; // owner => product code => struct Product
 
     function initialize(
         string memory _symbol,
@@ -106,6 +107,33 @@ contract Secondary is Market, ISecondaryMarket{
             1,
             listing.price,
             tx.origin
+        );
+    }
+
+    function purchaseProduct(string memory productCode, uint256 quantity)
+        external
+        payable
+        virtual
+        isActive
+    {
+        Product memory product = _holdingsBook[msg.sender][productCode];
+        require(_catalog[productCode].exists == true, "Product Does Not Exist In Catalog");
+        require(product.exists == true, "Product Does Not Exist In Holdings Book");
+        require(product.price * quantity <= msg.value, "Insufficient Funds");
+
+        uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
+        payable(product.owner).transfer(msg.value - marketCut);
+        payable(owner).transfer(marketCut);
+
+        product.quantity += quantity;
+        _holdingsBook[msg.sender][productCode] = product;
+
+        emit PurchaseProduct(
+            productCode,
+            product.name,
+            quantity,
+            product.price * quantity,
+            _msgSender()
         );
     }
 
