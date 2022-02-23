@@ -32,6 +32,13 @@ describe("SecondaryMarket", () => {
 			const Market = await ethers.getContractFactory("Market");
 			market = await Market.deploy();
 		});
+        
+        it("Add Default Market Extension", async () => {
+            const addDefaultMarketExtensionTx = await marketFactory
+                .connect(alice)
+                .addExtension("Default Market", market.address);
+            await addDefaultMarketExtensionTx.wait();
+        });
 
         it("Deploy Secondary Market", async () => {
 			const SecondaryMarket = await ethers.getContractFactory("Secondary");
