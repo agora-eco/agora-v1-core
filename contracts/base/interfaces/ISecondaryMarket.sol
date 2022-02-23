@@ -19,4 +19,12 @@ interface ISecondaryMarket {
         uint256 listingId,
         address indexed initiator
     );
+
+    event PurchaseProduct(
+        string productCode,
+        string productName,
+        uint256 quantity,
+        uint256 value,
+        address indexed initiator
+    );
 }
