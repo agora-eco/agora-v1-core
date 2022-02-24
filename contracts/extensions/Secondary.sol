@@ -155,8 +155,11 @@ contract Secondary is Market, ISecondaryMarket{
         return _listings[listingId];
     }
 
-    function sell(uint256 listingId) external payable virtual isActive {
-        require(listing.exists == true, "listing dne");
-        require(listing.owner == msg.sender, "owner");
+    function inspectProduct(string memory productCode) 
+        external
+        view
+        returns (Product memory)    
+    {
+        return _holdingsBook[msg.sender][productCode];
     }
 }
