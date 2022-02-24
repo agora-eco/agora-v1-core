@@ -8,13 +8,18 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol"; // replace with custom implementation
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol"; // replace with custom implementation
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./INFTLaunchMarket.sol";
 import "../../base/Market.sol";
 
 /**
  * @dev Example market built off the Agora market standard that supports NFT sales.
  */
-contract NFTLaunchMarket is Initializable, Market, ERC721EnumerableUpgradeable {
+contract NFTLaunchMarket is
+    Initializable,
+    Market,
+    ERC721EnumerableUpgradeable,
+    INFTLaunchMarket
+{
     uint256 private count;
     uint256 public maxPerOwner;
     string private _baseTokenURI;
@@ -33,10 +38,10 @@ contract NFTLaunchMarket is Initializable, Market, ERC721EnumerableUpgradeable {
         string memory _name,
         uint256 _maxPerOwner
     ) public virtual initializer {
-        __NFTSaleMarket_init(_symbol, _name, _maxPerOwner);
+        __NFTLaunchMarket_init(_symbol, _name, _maxPerOwner);
     }
 
-    function __NFTSaleMarket_init(
+    function __NFTLaunchMarket_init(
         string memory _symbol,
         string memory _name,
         uint256 _maxPerOwner
@@ -45,7 +50,7 @@ contract NFTLaunchMarket is Initializable, Market, ERC721EnumerableUpgradeable {
         __ERC721_init_unchained(_name, _symbol);
         __ERC721Enumerable_init_unchained();
         __Market_init_unchained(_symbol, _name);
-        __NFTSaleMarket_init_unchained(_symbol, _name, _maxPerOwner);
+        __NFTLaunchMarket_init_unchained(_maxPerOwner);
         /* setMarketSymbol(_symbol);
         setMarketName(_name);
         owner = tx.origin;
@@ -53,11 +58,10 @@ contract NFTLaunchMarket is Initializable, Market, ERC721EnumerableUpgradeable {
         _setupRole(ADMIN_ROLE, tx.origin); */
     }
 
-    function __NFTSaleMarket_init_unchained(
-        string memory _symbol,
-        string memory _name,
-        uint256 _maxPerOwner
-    ) internal initializer {
+    function __NFTLaunchMarket_init_unchained(uint256 _maxPerOwner)
+        internal
+        initializer
+    {
         maxPerOwner = _maxPerOwner;
     }
 
@@ -69,7 +73,12 @@ contract NFTLaunchMarket is Initializable, Market, ERC721EnumerableUpgradeable {
         return _baseTokenURI;
     }
 
-    function setMaxPerOwner(uint256 _maxPerOwner) public isAdmin {
+    function setMaxPerOwner(uint256 _maxPerOwner)
+        external
+        virtual
+        override
+        isAdmin
+    {
         maxPerOwner = _maxPerOwner;
     }
 
