@@ -162,4 +162,24 @@ contract Secondary is Market, ISecondaryMarket{
     {
         return _holdingsBook[msg.sender][productCode];
     }
+
+    function createProduct(
+        string calldata productCode,
+        string calldata productName,
+        uint256 price,
+        uint256 quantity
+    ) external virtual isAdmin {
+        require(_holdingsBook[msg.sender][productCode].exists == false, "Product Already Exists");
+
+        _holdingsBook[msg.sender][productCode] = Product(
+            true,
+            price,
+            productName,
+            quantity,
+            _msgSender(),
+            false
+        );
+
+        emit CreateProduct(productCode, productName, price, quantity, _msgSender());
+    }
 }
