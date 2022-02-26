@@ -1,5 +1,3 @@
-
-
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 import { Signer } from "ethers";
@@ -7,18 +5,20 @@ import { MarketFactory } from "../src/Types/MarketFactory";
 import { Market } from "../src/Types/Market";
 import { Secondary } from "../src/Types/Secondary";
 
-describe('Secondary', () => {
-    let alice: Signer, bob: Signer;
-    let secondary: Secondary;
+describe("Secondary", () => {
+	let alice: Signer, bob: Signer;
+	let secondary: Secondary;
 	let marketFactory: MarketFactory;
 	let market: Market;
-    before(async() => {
+	before(async () => {
 		[alice, bob] = await ethers.getSigners();
 	});
 
 	describe("Deploy MarketFactory", () => {
 		it("deploy", async () => {
-			const MarketFactory = await ethers.getContractFactory("MarketFactory");
+			const MarketFactory = await ethers.getContractFactory(
+				"MarketFactory"
+			);
 			marketFactory = await MarketFactory.deploy(
 				await alice.getAddress()
 			);
@@ -60,7 +60,7 @@ describe('Secondary', () => {
 					iface.encodeFunctionData("initialize", [
 						"TPM",
 						"Test Proxied Market",
-						1
+						1,
 					])
 				);
 
@@ -69,12 +69,15 @@ describe('Secondary', () => {
 
 		it("Retrieve", async () => {
 			const newMarketAddress = await marketFactory.markets(0);
-			market = await ethers.getContractAt("Secondary", newMarketAddress);
-			expect(await market.owner()).to.equal(await alice.getAddress());
+			secondary = await ethers.getContractAt(
+				"Secondary",
+				newMarketAddress
+			);
+			expect(await secondary.owner()).to.equal(await alice.getAddress());
 		});
 	});
 
-    describe("Establish catalog", () => {
+	describe("Establish catalog", () => {
 		it("owner create product", async () => {
 			const aliceCreateProductTxn = await secondary
 				.connect(alice)
@@ -101,6 +104,4 @@ describe('Secondary', () => {
 			);
 		});
 	});
-
-
 });

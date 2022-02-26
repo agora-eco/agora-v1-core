@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract Secondary is Market {
     uint256 public marketplaceFee;
+
     function initialize(
         string memory _symbol,
         string memory _name,
