@@ -180,6 +180,6 @@ contract Secondary is Market, ISecondaryMarket{
             false
         );
 
-        emit CreateProduct(productCode, productName, price, quantity, _msgSender());
+        emit Create(productCode, productName, price, quantity, _msgSender());
     }
 }
