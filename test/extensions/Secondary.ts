@@ -29,9 +29,9 @@ describe("SecondaryMarket", () => {
 
     describe("Initialize Proxies", () => {
         it("Deploy Default Market", async () => {
-			const Market = await ethers.getContractFactory("Market");
-			market = await Market.deploy();
-		});
+            const Market = await ethers.getContractFactory("Market");
+            market = await Market.deploy();
+        });
         
         it("Add Default Market Extension", async () => {
             const addDefaultMarketExtensionTx = await marketFactory
@@ -41,9 +41,9 @@ describe("SecondaryMarket", () => {
         });
 
         it("Deploy Secondary Market", async () => {
-			const SecondaryMarket = await ethers.getContractFactory("Secondary");
-			secondaryMarket = await SecondaryMarket.deploy();
-		});
+            const SecondaryMarket = await ethers.getContractFactory("Secondary");
+            secondaryMarket = await SecondaryMarket.deploy();
+        });
 
         it("Add Secondary Market Extension", async () => {
             const addSecondaryMarketExtensionTx = await marketFactory
@@ -52,4 +52,29 @@ describe("SecondaryMarket", () => {
             await addSecondaryMarketExtensionTx.wait();
         });
     });
+
+    describe("Create Product", async () => {
+        it("Owner Create Product", async () => {
+			const aliceCreateProductTxn = await secondaryMarket
+				.connect(alice)
+				["createProduct(string,string,uint256,uint256)"](
+					"MS",
+					"Milkshake",
+					ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+					1
+				);
+			await aliceCreateProductTxn.wait();
+		});
+    });
+
+    describe("Purchase Product", () => {
+        it("Valid Product Purchase", async () => {
+            const bobPurchaseTxn = await secondaryMarket.connect(bob).purchaseProduct(
+                "item1", 1, {
+				    value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+			    }
+            );
+            await bobPurchaseTxn.wait();
+        });
+    })
 })
