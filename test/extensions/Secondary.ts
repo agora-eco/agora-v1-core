@@ -53,28 +53,60 @@ describe("SecondaryMarket", () => {
         });
     });
 
-    describe("Create Product", async () => {
-        it("Owner Create Product", async () => {
-			const aliceCreateProductTxn = await secondaryMarket
-				.connect(alice)
-				["createProduct(string,string,uint256,uint256)"](
-					"MS",
-					"Milkshake",
-					ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-					1
+    describe("Manage Market", () => {
+		it("Deploy Secondary Market", async () => {
+			const iface = new ethers.utils.Interface([
+				"function initialize(string _symbol, string _name, uint256 _maxPerOwner)",
+			]);
+			const createSecondaryMarket = await marketFactory
+				.connect(bob)
+				.deployMarket(
+					"Secondary Market",
+					iface.encodeFunctionData("initialize", [
+						"GFM",
+						"GweiFace Market",
+						ethers.BigNumber.from((2).toString()),
+					])
 				);
-			await aliceCreateProductTxn.wait();
-		});
-    });
 
-    describe("Purchase Product", () => {
-        it("Valid Product Purchase", async () => {
-            const bobPurchaseTxn = await secondaryMarket.connect(bob).purchaseProduct(
-                "item1", 1, {
-				    value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-			    }
-            );
-            await bobPurchaseTxn.wait();
-        });
-    })
+			await createSecondaryMarket.wait();
+		});
+
+        it("Retrieve", async () => {
+			const newMarketAddress = await marketFactory.markets(0);
+			secondaryMarket = await ethers.getContractAt(
+				"Secondary",
+				newMarketAddress
+			);
+
+			expect(await secondaryMarket.owner()).to.equal(
+				await bob.getAddress()
+			);
+		});
+	});
+
+    // describe("Create Product", async () => {
+    //     it("Owner Create Product", async () => {
+	// 		const bobCreateProductTxn = await secondaryMarket
+	// 			.connect(bob)
+	// 			["create(string,string,uint256,uint256)"](
+	// 				"MS",
+	// 				"Milkshake",
+	// 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+	// 				1
+	// 			);
+	// 		await bobCreateProductTxn.wait();
+	// 	});
+    // });
+
+    // describe("Purchase Product", () => {
+    //     it("Valid Product Purchase", async () => {
+    //         const bobPurchaseTxn = await secondaryMarket.connect(bob).purchaseProduct(
+    //             "item1", 1, {
+	// 			    value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+	// 		    }
+    //         );
+    //         await bobPurchaseTxn.wait();
+    //     });
+    // });
 })
