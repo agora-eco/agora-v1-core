@@ -60,7 +60,7 @@ describe('Secondary', () => {
 					iface.encodeFunctionData("initialize", [
 						"TPM",
 						"Test Proxied Market",
-						1
+						1,
 					])
 				);
 

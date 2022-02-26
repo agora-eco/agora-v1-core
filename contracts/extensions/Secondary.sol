@@ -15,7 +15,10 @@ contract Secondary is Market {
         string memory _symbol,
         string memory _name,
         uint256 _marketplaceFee
-    ) public virtual initializer {
+    ) 
+    public 
+    virtual 
+    initializer {
         __SecondaryMarket_init(_symbol, _name, _marketplaceFee);
     }
 
@@ -23,7 +26,9 @@ contract Secondary is Market {
         string memory _symbol,
         string memory _name,
         uint256 _marketplaceFee
-    ) internal initializer {
+    ) 
+    internal 
+    initializer {
         __AccessControl_init_unchained();
         __Market_init_unchained(_symbol, _name);
         __SecondaryMarket_init_unchained(_symbol, _name, _marketplaceFee);
@@ -33,7 +38,9 @@ contract Secondary is Market {
         string memory _symbol,
         string memory _name,
         uint256 _marketplaceFee
-    ) internal initializer {
+    ) 
+    internal 
+    initializer {
         marketplaceFee = _marketplaceFee;
     }
 }
