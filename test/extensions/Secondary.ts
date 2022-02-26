@@ -85,28 +85,53 @@ describe("SecondaryMarket", () => {
 		});
 	});
 
-    // describe("Create Product", async () => {
-    //     it("Owner Create Product", async () => {
-	// 		const bobCreateProductTxn = await secondaryMarket
-	// 			.connect(bob)
-	// 			["create(string,string,uint256,uint256)"](
-	// 				"MS",
-	// 				"Milkshake",
-	// 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 				1
-	// 			);
-	// 		await bobCreateProductTxn.wait();
-	// 	});
+    describe("Establish Holdingsbook", async () => {
+        it("Owner Create Product", async () => {
+			const bobCreateProductTxn = await secondaryMarket
+				.connect(bob)
+				["create(string,string,uint256,uint256)"](
+					"MS",
+					"Milkshake",
+					ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+					1
+				);
+			await bobCreateProductTxn.wait();
+            
+            const milkshake = await secondaryMarket.inspectProduct("MS");
+            await expect(milkshake).to.eql([
+				true,
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+				"Milkshake",
+				ethers.BigNumber.from(1),
+				await bob.getAddress(),
+				false,
+			]);
+		});
+    });
+
+    // describe("Inspect Holdingsbook", async () => {
+    //     it("Inspect Valid Product", async () => {
+    //         const milkshake = await secondaryMarket.inspectProduct("MS");
+            
+    //         await expect(milkshake).to.eql([
+	// 			true,
+	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+	// 			"Milkshake",
+	// 			ethers.BigNumber.from(1),
+	// 			await bob.getAddress(),
+	// 			false,
+	// 		]);
+    //     });
     // });
 
     // describe("Purchase Product", () => {
     //     it("Valid Product Purchase", async () => {
-    //         const bobPurchaseTxn = await secondaryMarket.connect(bob).purchaseProduct(
-    //             "item1", 1, {
+    //         const alicePurchaseTxn = await secondaryMarket.connect(alice).purchaseProduct(
+    //             "MS", 1, {
 	// 			    value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
 	// 		    }
     //         );
-    //         await bobPurchaseTxn.wait();
+    //         await alicePurchaseTxn.wait();
     //     });
     // });
 })

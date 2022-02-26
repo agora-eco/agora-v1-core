@@ -160,6 +160,7 @@ contract Secondary is Market, ISecondaryMarket{
         view
         returns (Product memory)    
     {
+        require(_holdingsBook[msg.sender][productCode].exists == true, "Proudct dne");
         return _holdingsBook[msg.sender][productCode];
     }
 
