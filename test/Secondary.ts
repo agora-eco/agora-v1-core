@@ -24,7 +24,7 @@ describe('Secondary', () => {
 			);
 		});
 	});
-	
+
 	describe("Initialize Proxies", () => {
 		it("Deploy Default Market", async () => {
 			const Market = await ethers.getContractFactory("Market");
@@ -43,8 +43,33 @@ describe('Secondary', () => {
 		it("Add Secondary Market Extension", async () => {
 			const addSecondaryMarketExtensionTx = await marketFactory
 				.connect(alice)
-				.addExtension("Secondary Market", secondary.address);
+				.addExtension("Secondary", secondary.address);
 			await addSecondaryMarketExtensionTx.wait();
+		});
+	});
+
+	describe("Manage Market", () => {
+		it("Deploy", async () => {
+			const iface = new ethers.utils.Interface([
+				"function initialize(string _symbol, string _name)",
+			]);
+			const createMarketTxn = await marketFactory
+				.connect(alice)
+				.deployMarket(
+					"Secondary",
+					iface.encodeFunctionData("initialize", [
+						"TPM",
+						"Test Proxied Market",
+					])
+				);
+
+			await createMarketTxn.wait();
+		});
+
+		it("Retrieve", async () => {
+			const newMarketAddress = await marketFactory.markets(0);
+			market = await ethers.getContractAt("Secondary", newMarketAddress);
+			expect(await market.owner()).to.equal(await alice.getAddress());
 		});
 	});
 
