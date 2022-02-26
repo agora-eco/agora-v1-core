@@ -63,7 +63,7 @@ describe("NFT Launch Market", () => {
 			const createMarketTxn = await marketFactory
 				.connect(bob)
 				.deployMarket(
-					"NFT Launch",
+					1,
 					iface.encodeFunctionData("initialize", [
 						"GFM",
 						"GweiFace Market",

@@ -61,7 +61,7 @@ describe("Token Sale Market", () => {
 			const createMarketTxn = await marketFactory
 				.connect(bob)
 				.deployMarket(
-					"Token Sale",
+					1,
 					iface.encodeFunctionData("initialize", [
 						"ATM",
 						"Agora Token Market",

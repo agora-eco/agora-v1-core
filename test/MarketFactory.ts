@@ -49,7 +49,7 @@ describe("MarketFactory", () => {
 			const createMarketTxn = await marketFactory
 				.connect(alice)
 				.deployMarket(
-					"Default",
+					0,
 					iface.encodeFunctionData("initialize", [
 						"TPM",
 						"Test Proxied Market",
@@ -66,7 +66,7 @@ describe("MarketFactory", () => {
 			const createMarketTxn = await marketFactory
 				.connect(bob)
 				.deployMarket(
-					"Default",
+					0,
 					iface.encodeFunctionData("initialize", [
 						"BM",
 						"Bob's Beacon'd Market",
