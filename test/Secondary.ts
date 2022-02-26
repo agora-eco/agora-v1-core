@@ -51,7 +51,7 @@ describe('Secondary', () => {
 	describe("Manage Market", () => {
 		it("Deploy", async () => {
 			const iface = new ethers.utils.Interface([
-				"function initialize(string _symbol, string _name)",
+				"function initialize(string _symbol, string _name, uint256 _marketplaceFee)",
 			]);
 			const createMarketTxn = await marketFactory
 				.connect(alice)
@@ -60,6 +60,7 @@ describe('Secondary', () => {
 					iface.encodeFunctionData("initialize", [
 						"TPM",
 						"Test Proxied Market",
+						1
 					])
 				);
 
