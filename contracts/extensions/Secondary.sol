@@ -163,12 +163,12 @@ contract Secondary is Market, ISecondaryMarket{
         return _holdingsBook[msg.sender][productCode];
     }
 
-    function createProduct(
+    function create(
         string calldata productCode,
         string calldata productName,
         uint256 price,
         uint256 quantity
-    ) external virtual isAdmin {
+    ) external virtual override isAdmin {
         require(_holdingsBook[msg.sender][productCode].exists == false, "Product Already Exists");
 
         _holdingsBook[msg.sender][productCode] = Product(

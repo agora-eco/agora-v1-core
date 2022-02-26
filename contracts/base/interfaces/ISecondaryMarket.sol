@@ -35,11 +35,4 @@ interface ISecondaryMarket {
         uint256 quantity,
         address indexed initiator
     );
-
-    function createProduct(
-        string calldata productCode,
-        string calldata productName,
-        uint256 price,
-        uint256 quantity
-    ) external;
 }
