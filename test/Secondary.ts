@@ -104,4 +104,53 @@ describe("Secondary", () => {
 			);
 		});
 	});
+
+	describe("Purchase Item", () => {
+		it("Primary Item Purchase", async () => {
+			const bobPurchaseTxn = await secondary.connect(bob).purchase("MS", 1, {
+				value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+			});
+			await bobPurchaseTxn.wait();
+
+			const milkshake = await secondary.inspectItem("MS");
+			await expect(milkshake).to.eql([
+				true,
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()), // price
+				"Milkshake",
+				ethers.BigNumber.from(0), // quantity
+				await alice.getAddress(), // owner
+				false,
+			]);
+			let holdingsBook = await secondary._holdingsBook(await bob.getAddress(), "MS");
+			await expect(holdingsBook).to.eql(ethers.BigNumber.from(1));
+		});
+	});
+
+	describe("Add secondary products to catalog", () => {
+		it("non-owner create secondary product", async () => {
+			const bobCreateSecondaryProductTxn = await secondary
+				.connect(bob)
+				["create(string,uint256,uint256)"](
+					"MS",
+					(1 * 10 ** 17).toString(),
+					1
+				);
+			await bobCreateSecondaryProductTxn.wait();
+			let holdingsBook = await secondary._holdingsBook(await bob.getAddress(), "MS");
+			await expect(holdingsBook).to.eql(ethers.BigNumber.from(0));
+		});
+
+		it("non-owner create secondary product they didn't purchase", async () => {
+			const bobCreateSecondaryProductTxn2 = secondary
+				.connect(bob)
+				["create(string,uint256,uint256)"](
+					"MS",
+					(1 * 10 ** 17).toString(),
+					1
+				);
+			await expect(bobCreateSecondaryProductTxn2).to.be.revertedWith(
+				"selling more than you own"
+			);
+		});
+	});
 });
