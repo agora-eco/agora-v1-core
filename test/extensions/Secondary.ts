@@ -1,9 +1,9 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 import { Signer } from "ethers";
-import { MarketFactory } from "../../src/types/MarketFactory"
-import { Market } from "../../src/types/Market";
-import { Secondary } from "../../src/types/Secondary";
+import { MarketFactory } from "../../src/Types/MarketFactory";
+import { Market } from "../../src/Types/Market";
+import { Secondary } from "../../src/Types/Secondary";
 
 describe("SecondaryMarket", () => {
     let accounts: Signer[];
