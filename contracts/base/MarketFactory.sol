@@ -11,6 +11,8 @@ import "./Market.sol";
 
 contract MarketFactory {
     // create name registry to support extension contracts
+    // extension registry -> extension struct -> mapping(uint256 => ExtensionRegister)
+    // market registry -> market struct -> mapping(address => MarketRegister)
     using Strings for string;
 
     address public paymentProxyAddress;
@@ -20,6 +22,37 @@ contract MarketFactory {
     mapping(address => bool) internal _verified;
     mapping(string => UpgradeableBeacon) internal _extensionRegistry;
 
+    struct ExtensionRegister {
+        bool exists;
+        string name;
+        UpgradeableBeacon proxy;
+    }
+
+    struct MarketRegister {
+        bool exists;
+        address location;
+        address owner;
+        uint256 extensionId;
+    }
+
+    event AddExtension(
+        string extensionName,
+        address indexed logic,
+        address indexed deployer
+    );
+    event UpgradeExtension(
+        string extensionName,
+        address indexed oldLogic,
+        address indexed logic
+    );
+    event DeployMarket(
+        address indexed deployer,
+        string extensionName,
+        address indexed logic,
+        bytes data,
+        address indexed proxy
+    );
+
     constructor(address _paymentProxyAddress) {
         paymentProxyAddress = _paymentProxyAddress;
     }
@@ -28,12 +61,15 @@ contract MarketFactory {
         external
     {
         _extensionRegistry[extensionName] = new UpgradeableBeacon(logic);
+        emit AddExtension(extensionName, logic, msg.sender);
     }
 
     function upgradeExtension(string calldata extensionName, address logic)
         external
     {
+        address oldLogic = address(_extensionRegistry[extensionName]);
         _extensionRegistry[extensionName].upgradeTo(logic);
+        emit UpgradeExtension(extensionName, oldLogic, logic);
     }
 
     function deployMarket(string calldata extensionName, bytes calldata data)
@@ -50,6 +86,13 @@ contract MarketFactory {
         marketRegistry[proxyAddress] = extensionName;
         _registered[proxyAddress] = true;
 
+        emit DeployMarket(
+            msg.sender,
+            extensionName,
+            address(_extensionRegistry[extensionName]),
+            data,
+            proxyAddress
+        );
         return proxyAddress;
     }
 

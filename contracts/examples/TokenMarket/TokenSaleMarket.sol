@@ -6,28 +6,30 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol"; // replace with custom implementation
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol"; // replace with custom implementation
-import "./INFTLaunchMarket.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "./ITokenSaleMarket.sol";
 import "../../base/Market.sol";
 
 /**
  * @dev Example market built off the Agora market standard that supports NFT sales.
  */
-contract NFTLaunchMarket is
+contract TokenSaleMarket is
     Initializable,
     Market,
-    ERC721EnumerableUpgradeable,
-    INFTLaunchMarket
+    ERC20Upgradeable,
+    ITokenSaleMarket
 {
-    uint256 private count;
-    uint256 public maxPerOwner;
-    string private _baseTokenURI;
+    uint256 private _maxPerOwner;
+    uint256 private _maxSupply;
 
     modifier guard(string memory productCode, uint256 quantity) {
         require(msg.sender == tx.origin, "Request cannot be proxied");
         require(
-            balanceOf(tx.origin) + quantity <= maxPerOwner,
+            _maxSupply == 0 || totalSupply() + quantity <= _maxSupply,
+            "Exceeds maxSupply"
+        );
+        require(
+            balanceOf(tx.origin) + quantity <= _maxPerOwner,
             "Exceeds maxPerOwner"
         );
         _;
@@ -36,50 +38,56 @@ contract NFTLaunchMarket is
     function initialize(
         string memory _symbol,
         string memory _name,
-        uint256 _maxPerOwner
+        uint256 maxSupply_,
+        uint256 maxPerOwner_
     ) public virtual initializer {
-        __NFTLaunchMarket_init(_symbol, _name, _maxPerOwner);
+        __TokenSaleMarket_init(_symbol, _name, maxSupply_, maxPerOwner_);
     }
 
-    function __NFTLaunchMarket_init(
+    function __TokenSaleMarket_init(
         string memory _symbol,
         string memory _name,
-        uint256 _maxPerOwner
+        uint256 maxSupply_,
+        uint256 maxPerOwner_
     ) internal initializer {
         __AccessControl_init_unchained();
-        __ERC721_init_unchained(_name, _symbol);
-        __ERC721Enumerable_init_unchained();
+        __ERC20_init_unchained(_name, _symbol);
         __Market_init_unchained(_symbol, _name);
-        __NFTLaunchMarket_init_unchained(_maxPerOwner);
-        /* setMarketSymbol(_symbol);
-        setMarketName(_name);
-        owner = tx.origin;
-        _setupRole(DEFAULT_ADMIN_ROLE, tx.origin);
-        _setupRole(ADMIN_ROLE, tx.origin); */
+        __TokenSaleMarket_init_unchained(maxSupply_, maxPerOwner_);
     }
 
-    function __NFTLaunchMarket_init_unchained(uint256 _maxPerOwner)
-        internal
-        initializer
-    {
-        maxPerOwner = _maxPerOwner;
+    function __TokenSaleMarket_init_unchained(
+        uint256 maxSupply_,
+        uint256 maxPerOwner_
+    ) internal initializer {
+        _maxSupply = maxSupply_;
+        _maxPerOwner = maxPerOwner_;
     }
 
-    function setBaseURI(string calldata baseURI) external isAdmin {
-        _baseTokenURI = baseURI;
-    }
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
-    }
-
-    function setMaxPerOwner(uint256 _maxPerOwner)
+    function setMaxPerOwner(uint256 maxPerOwner_)
         external
         virtual
         override
         isAdmin
     {
-        maxPerOwner = _maxPerOwner;
+        _maxPerOwner = maxPerOwner_;
+    }
+
+    function setMaxSupply(uint256 maxSupply_)
+        external
+        virtual
+        override
+        isAdmin
+    {
+        _maxSupply = maxSupply_;
+    }
+
+    function maxPerOwner() external view virtual override returns (uint256) {
+        return _maxPerOwner;
+    }
+
+    function maxSupply() external view virtual override returns (uint256) {
+        return _maxSupply;
     }
 
     /**
@@ -101,11 +109,8 @@ contract NFTLaunchMarket is
         require(product.quantity >= quantity, "insufficient stock");
         require(quantity * product.price <= msg.value, "insufficient funds");
 
-        for (uint256 i = 0; i < quantity; i++) {
-            _safeMint(msg.sender, count + i);
-        }
+        _mint(msg.sender, quantity);
 
-        count += quantity;
         product.quantity -= quantity;
         _catalog[productCode] = product;
 
@@ -119,13 +124,6 @@ contract NFTLaunchMarket is
         //payable(owner).transfer(product.price);
     }
 
-    /* function mint(string calldata productCode, uint256 quantity)
-        productExist(productCode)
-        guard(productCode, quantity)
-    {
-        purchase(productCode, quantity);
-    } */
-
     function withdraw(address target, uint256 amount) external isAdmin {
         payable(target).transfer(amount);
     }
@@ -134,7 +132,7 @@ contract NFTLaunchMarket is
         public
         view
         virtual
-        override(AccessControlUpgradeable, ERC721EnumerableUpgradeable)
+        override(AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

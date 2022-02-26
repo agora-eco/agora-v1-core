@@ -22,7 +22,7 @@ Bob purchases product ✔
 
 */
 
-const { expect } = require("chai");
+/* const { expect } = require("chai");
 const { ethers } = require("hardhat");
 import { Signer } from "ethers";
 import { Market } from "../src/Types/Market";
@@ -196,3 +196,4 @@ describe("Market", () => {
 		});
 	});
 });
+ */
