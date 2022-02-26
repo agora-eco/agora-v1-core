@@ -56,7 +56,7 @@ describe("Secondary", () => {
 			const createMarketTxn = await marketFactory
 				.connect(alice)
 				.deployMarket(
-					"Secondary",
+					1,
 					iface.encodeFunctionData("initialize", [
 						"TPM",
 						"Test Proxied Market",
