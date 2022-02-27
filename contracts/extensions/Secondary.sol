@@ -83,9 +83,11 @@ contract Secondary is Market, ISecondaryMarket{
 
         listing.active = state;
         _listings[listingId] = listing;
+
+        // need event to reflect removing listing
     }
 
-    function purchase(uint256 listingId) external payable virtual isActive {
+    function purchaseListing(uint256 listingId) external payable virtual isActive {
         Listing memory listing = _listings[listingId];
         require(listing.exists == true, "listing dne");
         require(listing.owner != msg.sender, "owner");
@@ -170,9 +172,10 @@ contract Secondary is Market, ISecondaryMarket{
         uint256 price,
         uint256 quantity
     ) external virtual override isAdmin {
-        require(_holdingsBook[msg.sender][productCode].exists == false, "Product Already Exists");
-
-        _holdingsBook[msg.sender][productCode] = Product(
+        require(_catalog[productCode].exists == false, "Product Alredy Exists in Catalog");
+        require(_holdingsBook[msg.sender][productCode].exists == false, "Product Already Exists in HoldingsBook");
+        
+        Product memory newProduct = Product(
             true,
             price,
             productName,
@@ -180,6 +183,9 @@ contract Secondary is Market, ISecondaryMarket{
             _msgSender(),
             false
         );
+        
+        _catalog[productCode] = newProduct;
+        _holdingsBook[msg.sender][productCode] = newProduct;
 
         emit Create(productCode, productName, price, quantity, _msgSender());
     }
