@@ -27,12 +27,4 @@ interface ISecondaryMarket {
         uint256 value,
         address indexed initiator
     );
-
-    event CreateProduct(
-        string productCode,
-        string productName,
-        uint256 price,
-        uint256 quantity,
-        address indexed initiator
-    );
 }

@@ -36,7 +36,7 @@ describe("SecondaryMarket", () => {
         it("Add Default Market Extension", async () => {
             const addDefaultMarketExtensionTx = await marketFactory
                 .connect(alice)
-                .addExtension("Default Market", market.address);
+                .addExtension("Default", market.address);
             await addDefaultMarketExtensionTx.wait();
         });
 
@@ -54,12 +54,29 @@ describe("SecondaryMarket", () => {
     });
 
     describe("Manage Market", () => {
+        it("Deploy Primary Market", async () => {
+			const iface = new ethers.utils.Interface([
+				"function initialize(string _symbol, string _name)",
+			]);
+			const createMarketTxn = await marketFactory
+				.connect(alice)
+				.deployMarket(
+					"Default",
+					iface.encodeFunctionData("initialize", [
+						"TPM",
+						"Test Proxied Market",
+					])
+				);
+
+			await createMarketTxn.wait();
+		});
+
 		it("Deploy Secondary Market", async () => {
 			const iface = new ethers.utils.Interface([
 				"function initialize(string _symbol, string _name, uint256 _maxPerOwner)",
 			]);
 			const createSecondaryMarket = await marketFactory
-				.connect(bob)
+				.connect(alice)
 				.deployMarket(
 					"Secondary Market",
 					iface.encodeFunctionData("initialize", [
@@ -71,8 +88,14 @@ describe("SecondaryMarket", () => {
 
 			await createSecondaryMarket.wait();
 		});
+        
+        it("Retrieve Primary", async () => {
+			const newMarketAddress = await marketFactory.markets(0);
+			market = await ethers.getContractAt("Market", newMarketAddress);
+			expect(await market.owner()).to.equal(await alice.getAddress());
+		});
 
-        it("Retrieve", async () => {
+        it("Retrieve Secondary", async () => {
 			const newMarketAddress = await marketFactory.markets(0);
 			secondaryMarket = await ethers.getContractAt(
 				"Secondary",
@@ -80,39 +103,66 @@ describe("SecondaryMarket", () => {
 			);
 
 			expect(await secondaryMarket.owner()).to.equal(
-				await bob.getAddress()
+				await alice.getAddress()
 			);
 		});
 	});
 
-    describe("Establish Holdingsbook", async () => {
-        it("Owner Create Product", async () => {
-			const bobCreateProductTxn = await secondaryMarket
-				.connect(bob)
-				["create(string,string,uint256,uint256)"](
-					"MS",
-					"Milkshake",
-					ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-					1
-				);
-			await bobCreateProductTxn.wait();
-		});
-    });
+    // describe("Establish Holdingsbook", async () => {
+    //     it("Owner Create Product In Primary Market", async () => {
+	// 		const bobCreateProductTxn = await market
+	// 			.connect(bob)
+	// 			["create(string,string,uint256,uint256)"](
+	// 				"MS",
+	// 				"Milkshake",
+	// 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+	// 				1
+	// 			);
+	// 		await bobCreateProductTxn.wait();
+	// 	});
 
-    describe("Inspect Holdingsbook", async () => {
-        it("Inspect Valid Product", async () => {
-            const milkshake = await secondaryMarket.connect(bob).inspectProduct("MS");
+    //     it("Owner Create Product In Secondary Market", async () => {
+	// 		const bobCreateProductTxn = await secondaryMarket
+	// 			.connect(bob)
+	// 			["create(string,string,uint256,uint256)"](
+	// 				"MS",
+	// 				"Milkshake",
+	// 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+	// 				1
+	// 			);
+	// 		await bobCreateProductTxn.wait();
+	// 	});
+    // });
+    
+    // describe("Inspect Catalog", async () => {
+    //     it("Inspect Valid Product", async () => {
+    //         const milkshake = await market.connect(bob).inspectItem("MS");
             
-            await expect(milkshake).to.eql([
-				true,
-				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-				"Milkshake",
-				ethers.BigNumber.from(1),
-				await bob.getAddress(),
-				false,
-			]);
-        });
-    });
+    //         await expect(milkshake).to.eql([
+	// 			true,
+	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+	// 			"Milkshake",
+	// 			ethers.BigNumber.from(1),
+	// 			await bob.getAddress(),
+	// 			false,
+	// 		]);
+    //     });
+    // });
+
+    // describe("Inspect Holdingsbook", async () => {
+    //     it("Inspect Valid Product", async () => {
+    //         const milkshake = await secondaryMarket.connect(bob).inspectProduct("MS");
+            
+    //         await expect(milkshake).to.eql([
+	// 			true,
+	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+	// 			"Milkshake",
+	// 			ethers.BigNumber.from(1),
+	// 			await bob.getAddress(),
+	// 			false,
+	// 		]);
+    //     });
+    // });
 
     // describe("Purchase Product", () => {
     //     it("Valid Product Purchase", async () => {
@@ -122,6 +172,7 @@ describe("SecondaryMarket", () => {
 	// 		    }
     //         );
     //         await alicePurchaseTxn.wait();
+            
     //     });
     // });
 })
