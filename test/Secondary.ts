@@ -153,4 +153,13 @@ describe("Secondary", () => {
 			);
 		});
 	});
+
+	describe("Purchase Item", () => {
+		it("Secondary Item Purchase", async () => {
+			const alicePurchaseTxn = await secondary.connect(alice)["purchase_secondary(string,uint256)"]("MS", 1, {
+				value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+			});
+			await alicePurchaseTxn.wait();
+		});
+	});
 });
