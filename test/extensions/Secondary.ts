@@ -96,7 +96,7 @@ describe("SecondaryMarket", () => {
 		});
 
         it("Retrieve Secondary", async () => {
-			const newMarketAddress = await marketFactory.markets(0);
+			const newMarketAddress = await marketFactory.markets(1);
 			secondaryMarket = await ethers.getContractAt(
 				"Secondary",
 				newMarketAddress
@@ -108,61 +108,61 @@ describe("SecondaryMarket", () => {
 		});
 	});
 
-    // describe("Establish Holdingsbook", async () => {
-    //     it("Owner Create Product In Primary Market", async () => {
-	// 		const bobCreateProductTxn = await market
-	// 			.connect(bob)
-	// 			["create(string,string,uint256,uint256)"](
-	// 				"MS",
-	// 				"Milkshake",
-	// 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 				1
-	// 			);
-	// 		await bobCreateProductTxn.wait();
-	// 	});
+    describe("Establish Holdingsbook", async () => {
+        it("Owner Create Product In Primary Market", async () => {
+			const aliceCreateProductTxn = await market
+				.connect(alice)
+				["create(string,string,uint256,uint256)"](
+					"MS",
+					"Milkshake",
+					ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+					1
+				);
+			await aliceCreateProductTxn.wait();
+		});
 
-    //     it("Owner Create Product In Secondary Market", async () => {
-	// 		const bobCreateProductTxn = await secondaryMarket
-	// 			.connect(bob)
-	// 			["create(string,string,uint256,uint256)"](
-	// 				"MS",
-	// 				"Milkshake",
-	// 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 				1
-	// 			);
-	// 		await bobCreateProductTxn.wait();
-	// 	});
-    // });
+        it("Owner Create Product In Secondary Market", async () => {
+			const aliceCreateProductTxn = await secondaryMarket
+				.connect(alice)
+				["create(string,string,uint256,uint256)"](
+					"MS",
+					"Milkshake",
+					ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+					1
+				);
+			await aliceCreateProductTxn.wait();
+		});
+    });
     
-    // describe("Inspect Catalog", async () => {
-    //     it("Inspect Valid Product", async () => {
-    //         const milkshake = await market.connect(bob).inspectItem("MS");
+    describe("Inspect Catalog", async () => {
+        it("Inspect Valid Product", async () => {
+            const milkshake = await market.connect(alice).inspectItem("MS");
             
-    //         await expect(milkshake).to.eql([
-	// 			true,
-	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 			"Milkshake",
-	// 			ethers.BigNumber.from(1),
-	// 			await bob.getAddress(),
-	// 			false,
-	// 		]);
-    //     });
-    // });
+            await expect(milkshake).to.eql([
+				true,
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+				"Milkshake",
+				ethers.BigNumber.from(1),
+				await alice.getAddress(),
+				false,
+			]);
+        });
+    });
 
-    // describe("Inspect Holdingsbook", async () => {
-    //     it("Inspect Valid Product", async () => {
-    //         const milkshake = await secondaryMarket.connect(bob).inspectProduct("MS");
+    describe("Inspect Holdingsbook", async () => {
+        it("Inspect Valid Product", async () => {
+            const milkshake = await secondaryMarket.connect(alice).inspectProduct("MS");
             
-    //         await expect(milkshake).to.eql([
-	// 			true,
-	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 			"Milkshake",
-	// 			ethers.BigNumber.from(1),
-	// 			await bob.getAddress(),
-	// 			false,
-	// 		]);
-    //     });
-    // });
+            await expect(milkshake).to.eql([
+				true,
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+				"Milkshake",
+				ethers.BigNumber.from(1),
+				await alice.getAddress(),
+				false,
+			]);
+        });
+    });
 
     // describe("Purchase Product", () => {
     //     it("Valid Product Purchase", async () => {
