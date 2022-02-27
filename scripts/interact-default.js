@@ -1,13 +1,10 @@
 const hre = require("hardhat");
 
-const DEFAULT_MARKET = "0x3bbfcd0237fe92c1aa2fca76b39869f516aa9849";
+const MARKET = "0x1C5AA0FEf163a5F7e24B6699E22A4e527Ca2df2e";
 
 async function main() {
 	const [deployer] = await ethers.getSigners();
-	const market = await hre.ethers.getContractAt(
-		"Market",
-		deployedMarketAddress
-	);
+	const market = await hre.ethers.getContractAt("Market", MARKET);
 }
 
 main()
