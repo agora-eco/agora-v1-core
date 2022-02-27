@@ -96,8 +96,13 @@ describe("SecondaryMarket", () => {
 					1
 				);
 			await bobCreateProductTxn.wait();
+		});
+    });
+
+    describe("Inspect Holdingsbook", async () => {
+        it("Inspect Valid Product", async () => {
+            const milkshake = await secondaryMarket.connect(bob).inspectProduct("MS");
             
-            const milkshake = await secondaryMarket.inspectProduct("MS");
             await expect(milkshake).to.eql([
 				true,
 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
@@ -106,23 +111,8 @@ describe("SecondaryMarket", () => {
 				await bob.getAddress(),
 				false,
 			]);
-		});
+        });
     });
-
-    // describe("Inspect Holdingsbook", async () => {
-    //     it("Inspect Valid Product", async () => {
-    //         const milkshake = await secondaryMarket.inspectProduct("MS");
-            
-    //         await expect(milkshake).to.eql([
-	// 			true,
-	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 			"Milkshake",
-	// 			ethers.BigNumber.from(1),
-	// 			await bob.getAddress(),
-	// 			false,
-	// 		]);
-    //     });
-    // });
 
     // describe("Purchase Product", () => {
     //     it("Valid Product Purchase", async () => {
