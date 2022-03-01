@@ -7,7 +7,7 @@ import { NFTLaunchMarket } from "../src/Types/NFTLaunchMarket";
 import DefaultMarketAbi from "../artifacts/contracts/base/Market.sol/Market.json";
 import NFTLaunchAbi from "../artifacts/contracts/examples/NFTMarket/NFTLaunchMarket.sol/NFTLaunchMarket.json";
 
-describe("MarketFactory", () => {
+describe("NFT Launch Market", () => {
 	let accounts: Signer[];
 	let marketFactory: MarketFactory;
 	let market: Market;
@@ -63,7 +63,7 @@ describe("MarketFactory", () => {
 			const createMarketTxn = await marketFactory
 				.connect(bob)
 				.deployMarket(
-					"NFT Launch",
+					1,
 					iface.encodeFunctionData("initialize", [
 						"GFM",
 						"GweiFace Market",
