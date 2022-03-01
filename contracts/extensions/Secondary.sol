@@ -72,7 +72,7 @@ contract Secondary is Market, ISecondaryMarket{
             msg.sender
         );
 
-        emit List(productCode, product.name, price, newListingId, msg.sender);
+        emit PurchaseListing(productCode, product.name, price, newListingId, msg.sender);
         return newListingId;
     }
 
