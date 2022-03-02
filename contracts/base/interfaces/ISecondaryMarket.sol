@@ -12,7 +12,7 @@ interface ISecondaryMarket {
         address owner;
     }
 
-    event PurchaseListing(
+    event CreateListing(
         string productCode,
         string productName,
         uint256 price,
