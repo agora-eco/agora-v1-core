@@ -51,11 +51,13 @@ contract Secondary is Market, ISecondaryMarket{
         marketplaceFee = fees;
     }
 
-    function list(string memory productCode, uint256 price)
+    function list(string memory productCode, uint256 price, uint256 quantity)
         external
         isActive
         returns (uint256)
     {
+        require(quantity > 0, "invalid quantity");
+        require(_holdingsBook[_msgSender()][productCode] >= quantity, "Insufficient Holdings Count");
         Product memory product = _catalog[productCode];
         require(product.exists == true, "product dne");
 
@@ -71,6 +73,8 @@ contract Secondary is Market, ISecondaryMarket{
             price,
             _msgSender()
         );
+
+        _holdingsBook[_msgSender()][productCode] -= quantity;
 
         emit CreateListing(productCode, product.name, price, newListingId, _msgSender());
         return newListingId;
@@ -96,7 +100,7 @@ contract Secondary is Market, ISecondaryMarket{
         require(listing.price <= msg.value, "insufficient funds");
         require(_holdingsBook[ _msgSender()][listing.productCode] >= quantity, "Insufficient Holding Count");
 
-        uint256 marketCut = msg.value.mul(marketplaceFee.div(100)); // value * (marketplaceFee / 100)
+        uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
         payable(listing.owner).transfer(msg.value - marketCut);
         payable(owner).transfer(marketCut);
 
