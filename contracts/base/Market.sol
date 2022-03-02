@@ -202,11 +202,9 @@ contract Market is IMarket, Initializable, AccessControlUpgradeable {
         emit Adjust(productCode, productName, price, _msgSender());
     }
 
-    function _purchase(string calldata productCode, uint256 quantity)
+    function _purchase(string memory productCode, uint256 quantity)
         internal
-        payable
         virtual
-        override
         productExist(productCode)
         isActive
     {
