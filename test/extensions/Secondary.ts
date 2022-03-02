@@ -71,8 +71,8 @@ describe("SecondaryMarket", () => {
 		});
 	});
 
-    describe("Establish Holdingsbook", async () => {
-        it("Owner Create Product In Secondary Market", async () => {
+    describe("Establish Primary Market Catalog", async () => {
+        it("Owner Create Product In Primary Market Catalog", async () => {
 			const aliceCreateProductTxn = await secondaryMarket
 				.connect(alice)
 				["create(string,string,uint256,uint256)"](
@@ -83,9 +83,7 @@ describe("SecondaryMarket", () => {
 				);
 			await aliceCreateProductTxn.wait();
 		});
-    });
-    
-    describe("Inspect Catalog", async () => {
+
         it("Inspect Valid Product", async () => {
             const milkshake = await secondaryMarket.connect(alice).inspectItem("MS");
             
