@@ -1,8 +1,8 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 import { Signer } from "ethers";
-import { MarketFactory } from "../../src/Types/MarketFactory";
-import { Secondary } from "../../src/Types/Secondary";
+import { MarketFactory } from "../../src/types/MarketFactory";
+import { Secondary } from "../../src/types/Secondary";
 
 describe("SecondaryMarket", () => {
     let accounts: Signer[];
@@ -42,15 +42,15 @@ describe("SecondaryMarket", () => {
     describe("Manage Market", () => {
 		it("Deploy Secondary Market", async () => {
 			const iface = new ethers.utils.Interface([
-				"function initialize(string _symbol, string _name, uint256 _maxPerOwner)",
+				"function initialize(string _symbol, string _name, uint256 _marketplaceFee)",
 			]);
 			const createSecondaryMarket = await marketFactory
 				.connect(alice)
 				.deployMarket(
-					"Secondary",
+					1,
 					iface.encodeFunctionData("initialize", [
-						"GFM",
-						"GweiFace Market",
+						"SEC",
+						"Secondary Market",
 						ethers.BigNumber.from((2).toString()),
 					])
 				);
