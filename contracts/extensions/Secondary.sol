@@ -18,7 +18,7 @@ contract Secondary is Market, ISecondaryMarket{
     Counters.Counter private _listingId;
     uint256 public marketplaceFee;
     mapping (uint256 => Listing) _listings;
-    mapping (address => mapping(string => Product)) _holdingsBook; // owner => product code => struct Product
+    mapping (address => mapping(string => uint256)) _holdingsBook; // owner => product code => struct Product
 
     function initialize(
         string memory _symbol,
@@ -118,9 +118,11 @@ contract Secondary is Market, ISecondaryMarket{
         virtual
         isActive
     {
-        Product memory product = _holdingsBook[_msgSender()][productCode];
-        require(_catalog[productCode].exists == true, "Product Does Not Exist In Catalog");
-        require(product.exists == true, "Product Does Not Exist In Holdings Book");
+        uint256 productCount = _holdingsBook[_msgSender()][productCode];
+        Product memory product = _catalog[productCode];
+        
+        require(product.exists == true, "Product Does Not Exist In Catalog");
+        require(productCount > 0, "Product Does Not Exist In Holdings Book");
         require(product.price * quantity <= msg.value, "Insufficient Funds");
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
@@ -128,7 +130,7 @@ contract Secondary is Market, ISecondaryMarket{
         payable(owner).transfer(marketCut);
 
         product.quantity += quantity;
-        _holdingsBook[_msgSender()][productCode] = product;
+        _holdingsBook[_msgSender()][productCode] = product.quantity;
 
         emit PurchaseProduct(
             productCode,
@@ -157,12 +159,12 @@ contract Secondary is Market, ISecondaryMarket{
         return _listings[listingId];
     }
 
-    function inspectHolding(address owner, string memory productCode) 
+    function inspectHoldingCount(address owner, string memory productCode) 
         external
         view
-        returns (Product memory)    
+        returns (uint256)    
     {
-        require(_holdingsBook[owner][productCode].exists == true, "Proudct dne");
+        require(_holdingsBook[owner][productCode] > 0, "Proudct dne");
         return _holdingsBook[owner][productCode];
     }
 
@@ -173,7 +175,7 @@ contract Secondary is Market, ISecondaryMarket{
         uint256 quantity
     ) external virtual override isAdmin {
         require(_catalog[productCode].exists == false, "Product Alredy Exists in Catalog");
-        require(_holdingsBook[_msgSender()][productCode].exists == false, "Product Already Exists in HoldingsBook");
+        require(_holdingsBook[_msgSender()][productCode] == 0, "Product Already Exists in HoldingsBook");
         
         Product memory newProduct = Product(
             true,
@@ -185,7 +187,7 @@ contract Secondary is Market, ISecondaryMarket{
         );
         
         _catalog[productCode] = newProduct;
-        _holdingsBook[_msgSender()][productCode] = newProduct;
+        _holdingsBook[_msgSender()][productCode] = newProduct.quantity;
 
         emit Create(productCode, productName, price, quantity, _msgSender());
     }
