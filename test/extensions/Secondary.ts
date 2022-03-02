@@ -109,42 +109,22 @@ describe("SecondaryMarket", () => {
             );
 
             await alicePurchaseProductTxn.wait();
+
+            const milkshakeCount = await secondaryMarket.connect(alice).inspectHoldingCount(alice.getAddress(), "MS");
+            
+            // await expect(milkshake).to.eql([
+			// 	true,
+			// 	ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+			// 	"Milkshake",
+			// 	ethers.BigNumber.from(1),
+			// 	await alice.getAddress(),
+			// 	false,
+			// ]);
+            await expect(milkshakeCount).to.eql(1);
         });
     });
 
-    // describe("Inspect Holdingsbook", async () => {
-    //     it("Inspect Valid Product", async () => {
-    //         const milkshake = await secondaryMarket.connect(alice).inspectProduct("MS");
-            
-    //         await expect(milkshake).to.eql([
-	// 			true,
-	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 			"Milkshake",
-	// 			ethers.BigNumber.from(1),
-	// 			await alice.getAddress(),
-	// 			false,
-	// 		]);
-    //     });
-    // });
-
-    // describe("Purchase Product", () => {
-    //     it("Valid Product Purchase", async () => {
-    //         const alicePurchaseTxn = await secondaryMarket.connect(alice).purchaseProduct(
-    //             "MS", 1, {
-	// 			    value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 		    }
-    //         );
-    //         await alicePurchaseTxn.wait();
-
-    //         const milkshake = await secondaryMarket.inspectItem("MS");
-	// 		await expect(milkshake).to.eql([
-	// 			true,
-	// 			ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-	// 			"Milkshake",
-	// 			ethers.BigNumber.from(1),
-	// 			await alice.getAddress(),
-	// 			false,
-	// 		]);
-    //     });
-    // });
+    describe("Manage Listing", () => {
+        
+    });
 })
