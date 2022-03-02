@@ -69,10 +69,10 @@ contract Secondary is Market, ISecondaryMarket{
             productCode,
             product.name,
             price,
-            msg.sender
+            _msgSender()
         );
 
-        emit PurchaseListing(productCode, product.name, price, newListingId, msg.sender);
+        emit PurchaseListing(productCode, product.name, price, newListingId, _msgSender());
         return newListingId;
     }
 
@@ -90,7 +90,7 @@ contract Secondary is Market, ISecondaryMarket{
     function purchaseListing(uint256 listingId) external payable virtual isActive {
         Listing memory listing = _listings[listingId];
         require(listing.exists == true, "listing dne");
-        require(listing.owner != msg.sender, "owner");
+        require(listing.owner != _msgSender(), "owner");
         require(listing.active == true, "listing inactive");
         require(listing.settled == false, "listing settled");
         require(listing.price <= msg.value, "insufficient funds");
@@ -118,7 +118,7 @@ contract Secondary is Market, ISecondaryMarket{
         virtual
         isActive
     {
-        Product memory product = _holdingsBook[msg.sender][productCode];
+        Product memory product = _holdingsBook[_msgSender()][productCode];
         require(_catalog[productCode].exists == true, "Product Does Not Exist In Catalog");
         require(product.exists == true, "Product Does Not Exist In Holdings Book");
         require(product.price * quantity <= msg.value, "Insufficient Funds");
@@ -128,7 +128,7 @@ contract Secondary is Market, ISecondaryMarket{
         payable(owner).transfer(marketCut);
 
         product.quantity += quantity;
-        _holdingsBook[msg.sender][productCode] = product;
+        _holdingsBook[_msgSender()][productCode] = product;
 
         emit PurchaseProduct(
             productCode,
@@ -142,7 +142,7 @@ contract Secondary is Market, ISecondaryMarket{
     function adjust(uint256 listingId, uint256 price) external {
         Listing memory listing = _listings[listingId];
         require(listing.exists == true, "listing dne");
-        require(listing.owner == msg.sender, "not owner");
+        require(listing.owner == _msgSender(), "not owner");
         require(listing.settled == false, "listing settled");
 
         listing.price = price;
@@ -162,8 +162,8 @@ contract Secondary is Market, ISecondaryMarket{
         view
         returns (Product memory)    
     {
-        require(_holdingsBook[msg.sender][productCode].exists == true, "Proudct dne");
-        return _holdingsBook[msg.sender][productCode];
+        require(_holdingsBook[_msgSender()][productCode].exists == true, "Proudct dne");
+        return _holdingsBook[_msgSender()][productCode];
     }
 
     function create(
@@ -173,7 +173,7 @@ contract Secondary is Market, ISecondaryMarket{
         uint256 quantity
     ) external virtual override isAdmin {
         require(_catalog[productCode].exists == false, "Product Alredy Exists in Catalog");
-        require(_holdingsBook[msg.sender][productCode].exists == false, "Product Already Exists in HoldingsBook");
+        require(_holdingsBook[_msgSender()][productCode].exists == false, "Product Already Exists in HoldingsBook");
         
         Product memory newProduct = Product(
             true,
@@ -185,7 +185,7 @@ contract Secondary is Market, ISecondaryMarket{
         );
         
         _catalog[productCode] = newProduct;
-        _holdingsBook[msg.sender][productCode] = newProduct;
+        _holdingsBook[_msgSender()][productCode] = newProduct;
 
         emit Create(productCode, productName, price, quantity, _msgSender());
     }
