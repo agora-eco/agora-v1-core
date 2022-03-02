@@ -87,7 +87,6 @@ contract Secondary is Market, ISecondaryMarket{
         // need event to reflect removing listing
     }
 
-    function purchaseListing(uint256 listingId) external payable virtual isActive {
     function purchaseListing(uint256 listingId, uint256 quantity) external payable virtual isActive {
         Listing memory listing = _listings[listingId];
         require(listing.exists == true, "listing dne");
@@ -119,29 +118,18 @@ contract Secondary is Market, ISecondaryMarket{
         external
         payable
         virtual
+        productExist(productCode)
         isActive
     {
-        uint256 productCount = _holdingsBook[_msgSender()][productCode];
+        _purchase(productCode, quantity);
         Product memory product = _catalog[productCode];
-        
-        require(product.exists == true, "Product Does Not Exist In Catalog");
-        require(productCount > 0, "Product Does Not Exist In Holdings Book");
-        require(product.price * quantity <= msg.value, "Insufficient Funds");
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
         payable(product.owner).transfer(msg.value - marketCut);
         payable(owner).transfer(marketCut);
 
         product.quantity += quantity;
-        _holdingsBook[_msgSender()][productCode] = product.quantity;
-
-        emit PurchaseProduct(
-            productCode,
-            product.name,
-            quantity,
-            product.price * quantity,
-            _msgSender()
-        );
+        _holdingsBook[_msgSender()][productCode] += quantity;
     }
 
     function adjust(uint256 listingId, uint256 price) external {
@@ -169,29 +157,5 @@ contract Secondary is Market, ISecondaryMarket{
     {
         require(_holdingsBook[owner][productCode] > 0, "Proudct dne");
         return _holdingsBook[owner][productCode];
-    }
-
-    function create(
-        string calldata productCode,
-        string calldata productName,
-        uint256 price,
-        uint256 quantity
-    ) external virtual override isAdmin {
-        require(_catalog[productCode].exists == false, "Product Alredy Exists in Catalog");
-        require(_holdingsBook[_msgSender()][productCode] == 0, "Product Already Exists in HoldingsBook");
-        
-        Product memory newProduct = Product(
-            true,
-            price,
-            productName,
-            quantity,
-            _msgSender(),
-            false
-        );
-        
-        _catalog[productCode] = newProduct;
-        _holdingsBook[_msgSender()][productCode] = newProduct.quantity;
-
-        emit Create(productCode, productName, price, quantity, _msgSender());
     }
 }
