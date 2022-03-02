@@ -157,13 +157,13 @@ contract Secondary is Market, ISecondaryMarket{
         return _listings[listingId];
     }
 
-    function inspectProduct(string memory productCode) 
+    function inspectHolding(address owner, string memory productCode) 
         external
         view
         returns (Product memory)    
     {
-        require(_holdingsBook[_msgSender()][productCode].exists == true, "Proudct dne");
-        return _holdingsBook[_msgSender()][productCode];
+        require(_holdingsBook[owner][productCode].exists == true, "Proudct dne");
+        return _holdingsBook[owner][productCode];
     }
 
     function create(
