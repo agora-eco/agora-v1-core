@@ -47,7 +47,7 @@ describe("SecondaryMarket", () => {
 			const createSecondaryMarket = await marketFactory
 				.connect(alice)
 				.deployMarket(
-					1,
+					0,
 					iface.encodeFunctionData("initialize", [
 						"SEC",
 						"Secondary Market",
