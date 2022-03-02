@@ -11,14 +11,14 @@ import {Market} from "../base/Market.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract Secondary is Market, ISecondaryMarket{
+contract Secondary is Market, ISecondaryMarket {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
     Counters.Counter private _listingId;
     uint256 public marketplaceFee;
-    mapping (uint256 => Listing) _listings;
-    mapping (address => mapping(string => uint256)) _holdingsBook; // owner => product code => struct Product
+    mapping(uint256 => Listing) _listings;
+    mapping(address => mapping(string => uint256)) _holdingsBook;
 
     function initialize(
         string memory _symbol,
@@ -76,7 +76,13 @@ contract Secondary is Market, ISecondaryMarket{
 
         _holdingsBook[_msgSender()][productCode] -= quantity;
 
-        emit CreateListing(productCode, product.name, price, newListingId, _msgSender());
+        emit CreateListing(
+            productCode,
+            product.name,
+            price,
+            newListingId,
+            _msgSender()
+        );
         return newListingId;
     }
 
@@ -91,14 +97,21 @@ contract Secondary is Market, ISecondaryMarket{
         // need event to reflect removing listing
     }
 
-    function purchaseListing(uint256 listingId, uint256 quantity) external payable virtual isActive {
+    function purchaseListing(uint256 listingId, uint256 quantity)
+        external
+        payable
+        isActive
+    {
         Listing memory listing = _listings[listingId];
         require(listing.exists == true, "listing dne");
         require(listing.owner != _msgSender(), "owner");
         require(listing.active == true, "listing inactive");
         require(listing.settled == false, "listing settled");
         require(listing.price <= msg.value, "insufficient funds");
-        require(_holdingsBook[ _msgSender()][listing.productCode] >= quantity, "Insufficient Holding Count");
+        require(
+            _holdingsBook[_msgSender()][listing.productCode] >= quantity,
+            "Insufficient Holding Count"
+        );
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
         payable(listing.owner).transfer(msg.value - marketCut);
@@ -107,7 +120,7 @@ contract Secondary is Market, ISecondaryMarket{
         listing.active = false;
         listing.settled = true;
         _listings[listingId] = listing;
-        _holdingsBook[ _msgSender()][listing.productCode] -= quantity;
+        _holdingsBook[_msgSender()][listing.productCode] -= quantity;
 
         emit Purchase(
             listing.productCode,
@@ -118,21 +131,21 @@ contract Secondary is Market, ISecondaryMarket{
         );
     }
 
-    function purchaseProduct(string memory productCode, uint256 quantity)
+    function purchaseProduct(string calldata productCode, uint256 quantity)
         external
         payable
-        virtual
         productExist(productCode)
         isActive
     {
+        _targetProduct = _catalog[productCode];
         _purchase(productCode, quantity);
-        Product memory product = _catalog[productCode];
+        //Product memory product = _catalog[productCode];
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
-        payable(product.owner).transfer(msg.value - marketCut);
+        payable(_targetProduct.owner).transfer(msg.value - marketCut);
         payable(owner).transfer(marketCut);
 
-        product.quantity += quantity;
+        _targetProduct.quantity += quantity;
         _holdingsBook[_msgSender()][productCode] += quantity;
     }
 
@@ -154,10 +167,10 @@ contract Secondary is Market, ISecondaryMarket{
         return _listings[listingId];
     }
 
-    function inspectHoldingCount(address owner, string memory productCode) 
+    function inspectHoldingCount(address owner, string memory productCode)
         external
         view
-        returns (uint256)    
+        returns (uint256)
     {
         require(_holdingsBook[owner][productCode] > 0, "Proudct dne");
         return _holdingsBook[owner][productCode];
