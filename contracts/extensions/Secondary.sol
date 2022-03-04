@@ -108,10 +108,6 @@ contract Secondary is Market, ISecondaryMarket {
         require(listing.active == true, "listing inactive");
         require(listing.settled == false, "listing settled");
         require(listing.price <= msg.value, "insufficient funds");
-        require(
-            _holdingsBook[_msgSender()][listing.productCode] >= quantity,
-            "Insufficient Holding Count"
-        );
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
         payable(listing.owner).transfer(msg.value - marketCut);
