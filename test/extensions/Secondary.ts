@@ -110,8 +110,18 @@ describe("SecondaryMarket", () => {
 
             await alicePurchaseProductTxn.wait();
 
-            const milkshakeCount = await secondaryMarket.connect(alice).inspectHoldingCount(await alice.getAddress(), "MS");
-            await expect(milkshakeCount).to.eql(ethers.BigNumber.from(1));
+            const secondaryMarketMilkshakeCount = await secondaryMarket.connect(alice).inspectHoldingCount(await alice.getAddress(), "MS");
+            await expect(secondaryMarketMilkshakeCount).to.eql(ethers.BigNumber.from(1));
+
+            const primaryMarketMilkshake = await secondaryMarket.connect(alice).inspectItem("MS");
+            await expect(primaryMarketMilkshake).to.eql([
+				true,
+				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+				"Milkshake",
+				ethers.BigNumber.from(0),
+				await alice.getAddress(),
+				false,
+			]);
         });
     });
 

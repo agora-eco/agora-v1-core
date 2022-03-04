@@ -139,7 +139,6 @@ contract Secondary is Market, ISecondaryMarket {
     {
         _targetProduct = _catalog[productCode];
         _purchase(productCode, quantity);
-        //Product memory product = _catalog[productCode];
 
         uint256 marketCut = msg.value.mul(marketplaceFee.div(100));
         payable(_targetProduct.owner).transfer(msg.value - marketCut);
