@@ -132,11 +132,30 @@ describe("SecondaryMarket", () => {
                 ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
                 1
             );
-            await expect(aliceCreateListingTxn).to.eql([
+            await aliceCreateListingTxn.wait();
+
+            const milkshakeListing = await secondaryMarket.connect(alice).inspectListing(1);
+            await expect(milkshakeListing).to.eql([
+                true,
+                true,
+                false,
                 "MS",
                 "Milkshake",
                 ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+                await alice.getAddress()
+            ]);
+        });
+
+        it("Valid purchasing a Listing should Update the Listing Mapping", async () => {
+            const bobPurchaseListingTxn = await secondaryMarket.connect(bob).purchaseListing(
                 1,
+                1,
+                {
+                    value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+                }
+            );
+            await bobPurchaseListingTxn.wait();
+
             const milkshakeListing = await secondaryMarket.connect(alice).inspectListing(1);
             await expect(milkshakeListing).to.eql([
                 true,
