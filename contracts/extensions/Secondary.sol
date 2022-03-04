@@ -116,7 +116,6 @@ contract Secondary is Market, ISecondaryMarket {
         listing.active = false;
         listing.settled = true;
         _listings[listingId] = listing;
-        _holdingsBook[_msgSender()][listing.productCode] -= quantity;
 
         emit Purchase(
             listing.productCode,
