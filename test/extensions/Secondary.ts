@@ -137,6 +137,14 @@ describe("SecondaryMarket", () => {
                 "Milkshake",
                 ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
                 1,
+            const milkshakeListing = await secondaryMarket.connect(alice).inspectListing(1);
+            await expect(milkshakeListing).to.eql([
+                true,
+                false,
+                true,
+                "MS",
+                "Milkshake",
+                ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
                 await alice.getAddress()
             ]);
         });
