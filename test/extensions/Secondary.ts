@@ -126,6 +126,19 @@ describe("SecondaryMarket", () => {
     });
 
     describe("Manage Listing", () => {
-        
+        it("Create Valid Listing should Add to Listing Mapping", async () => {
+            const aliceCreateListingTxn = await secondaryMarket.connect(alice).createListing(
+                "MS",
+                ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+                1
+            );
+            await expect(aliceCreateListingTxn).to.eql([
+                "MS",
+                "Milkshake",
+                ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
+                1,
+                await alice.getAddress()
+            ]);
+        });
     });
 })
