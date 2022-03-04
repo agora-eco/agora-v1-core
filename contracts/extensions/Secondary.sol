@@ -51,7 +51,7 @@ contract Secondary is Market, ISecondaryMarket {
         marketplaceFee = fees;
     }
 
-    function list(string memory productCode, uint256 price, uint256 quantity)
+    function createListing(string memory productCode, uint256 price, uint256 quantity)
         external
         isActive
         returns (uint256)
