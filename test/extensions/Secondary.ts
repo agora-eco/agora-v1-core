@@ -122,6 +122,14 @@ describe("SecondaryMarket", () => {
 				await alice.getAddress(),
 				false,
 			]);
+
+            const balanceOfAlice = await secondaryMarket.balanceOf(
+				await alice.getAddress()
+			);
+
+			await expect(balanceOfAlice).to.equal(
+				ethers.BigNumber.from((0).toString())
+			);
         });
     });
 
