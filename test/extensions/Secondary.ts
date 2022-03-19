@@ -99,6 +99,8 @@ describe("SecondaryMarket", () => {
 
     describe("Establish HoldingsBook", async () => {
         it("Valid Purchase From Primary Market should add to Secondary Market HoldingsBook", async () => {
+            const aliceBeforePurchaseBalance = await alice.getBalance();
+
             const alicePurchaseProductTxn = await secondaryMarket.connect(alice).purchaseProduct(
                 "MS",
                 1,
@@ -121,13 +123,10 @@ describe("SecondaryMarket", () => {
 				await alice.getAddress(),
 				false,
 			]);
-
-            const balanceOfAlice = await secondaryMarket.balanceOf(
-				await alice.getAddress()
-			);
-
-			await expect(balanceOfAlice).to.equal(
-				ethers.BigNumber.from((0).toString())
+            
+            const aliceAfterPurchaseBalance = await alice.getBalance();
+			await expect(aliceAfterPurchaseBalance).to.equal(
+                aliceBeforePurchaseBalance.sub(ethers.BigNumber.from((0.1 * 10 ** 18).toString()))
 			);
         });
     });
