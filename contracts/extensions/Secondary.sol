@@ -5,8 +5,6 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import {ISecondaryMarket} from "../base/interfaces/ISecondaryMarket.sol";
 import {IMarket} from "../base/interfaces/IMarket.sol";
 import {Market} from "../base/Market.sol";

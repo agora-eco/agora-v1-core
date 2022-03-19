@@ -5,11 +5,10 @@ import { MarketFactory } from "../../src/types/MarketFactory";
 import { Secondary } from "../../src/types/Secondary";
 
 describe("SecondaryMarket", () => {
-    let accounts: Signer[];
     let marketFactory: MarketFactory;
 	let secondaryMarket: Secondary;
 	let alice: Signer, bob: Signer;
-    
+
     before(async () => {
 		[alice, bob] = await ethers.getSigners();
 	});
