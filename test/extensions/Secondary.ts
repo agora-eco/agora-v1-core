@@ -153,6 +153,8 @@ describe("SecondaryMarket", () => {
         });
 
         it("Valid purchasing a Listing should Update the Listing Mapping", async () => {
+            const bobBeforePurchaseBalance = await bob.getBalance();
+
             const alicePurchaseListingTxn = await secondaryMarket.connect(alice).purchaseListing(
                 1,
                 1,
@@ -172,6 +174,11 @@ describe("SecondaryMarket", () => {
                 ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
                 await bob.getAddress()
             ]);
+
+            const bobAfterPurchaseBalance = await bob.getBalance();
+			await expect(bobAfterPurchaseBalance).to.equal(
+                bobBeforePurchaseBalance.add(ethers.BigNumber.from((0.1 * 10 ** 18).toString()))
+			);
         });
     });
 })
