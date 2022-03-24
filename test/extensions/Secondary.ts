@@ -133,14 +133,14 @@ describe("SecondaryMarket", () => {
 
     describe("Manage Listing", () => {
         it("Create Valid Listing should Add to Listing Mapping", async () => {
-            const aliceCreateListingTxn = await secondaryMarket.connect(alice).createListing(
+            const bobCreateListingTxn = await secondaryMarket.connect(bob).createListing(
                 "MS",
                 ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
                 1
             );
-            await aliceCreateListingTxn.wait();
+            await bobCreateListingTxn.wait();
 
-            const milkshakeListing = await secondaryMarket.connect(alice).inspectListing(1);
+            const milkshakeListing = await secondaryMarket.connect(bob).inspectListing(1);
             await expect(milkshakeListing).to.eql([
                 true,
                 true,
@@ -148,19 +148,19 @@ describe("SecondaryMarket", () => {
                 "MS",
                 "Milkshake",
                 ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-                await alice.getAddress()
+                await bob.getAddress()
             ]);
         });
 
         it("Valid purchasing a Listing should Update the Listing Mapping", async () => {
-            const bobPurchaseListingTxn = await secondaryMarket.connect(bob).purchaseListing(
+            const alicePurchaseListingTxn = await secondaryMarket.connect(alice).purchaseListing(
                 1,
                 1,
                 {
                     value: ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
                 }
             );
-            await bobPurchaseListingTxn.wait();
+            await alicePurchaseListingTxn.wait();
 
             const milkshakeListing = await secondaryMarket.connect(alice).inspectListing(1);
             await expect(milkshakeListing).to.eql([
@@ -170,7 +170,7 @@ describe("SecondaryMarket", () => {
                 "MS",
                 "Milkshake",
                 ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
-                await alice.getAddress()
+                await bob.getAddress()
             ]);
         });
     });
