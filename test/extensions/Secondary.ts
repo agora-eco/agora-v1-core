@@ -101,7 +101,7 @@ describe("SecondaryMarket", () => {
         it("Valid Purchase From Primary Market should add to Secondary Market HoldingsBook", async () => {
             const aliceBeforePurchaseBalance = await alice.getBalance();
 
-            const alicePurchaseProductTxn = await secondaryMarket.connect(alice).purchaseProduct(
+            const bobPurchaseProductTxn = await secondaryMarket.connect(bob).purchaseProduct(
                 "MS",
                 1,
                 {
@@ -109,12 +109,12 @@ describe("SecondaryMarket", () => {
                 }
             );
 
-            await alicePurchaseProductTxn.wait();
+            await bobPurchaseProductTxn.wait();
 
-            const secondaryMarketMilkshakeCount = await secondaryMarket.connect(alice).inspectHoldingCount(await alice.getAddress(), "MS");
+            const secondaryMarketMilkshakeCount = await secondaryMarket.connect(bob).inspectHoldingCount(await bob.getAddress(), "MS");
             await expect(secondaryMarketMilkshakeCount).to.eql(ethers.BigNumber.from(1));
 
-            const primaryMarketMilkshake = await secondaryMarket.connect(alice).inspectItem("MS");
+            const primaryMarketMilkshake = await secondaryMarket.connect(bob).inspectItem("MS");
             await expect(primaryMarketMilkshake).to.eql([
 				true,
 				ethers.BigNumber.from((0.1 * 10 ** 18).toString()),
@@ -126,7 +126,7 @@ describe("SecondaryMarket", () => {
             
             const aliceAfterPurchaseBalance = await alice.getBalance();
 			await expect(aliceAfterPurchaseBalance).to.equal(
-                aliceBeforePurchaseBalance.sub(ethers.BigNumber.from((0.1 * 10 ** 18).toString()))
+                aliceBeforePurchaseBalance.add(ethers.BigNumber.from((0.1 * 10 ** 18).toString()))
 			);
         });
     });
