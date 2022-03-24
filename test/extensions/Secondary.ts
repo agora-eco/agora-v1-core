@@ -125,9 +125,7 @@ describe("SecondaryMarket", () => {
 			]);
             
             const aliceAfterPurchaseBalance = await alice.getBalance();
-			await expect(aliceAfterPurchaseBalance).to.equal(
-                aliceBeforePurchaseBalance.add(ethers.BigNumber.from((0.1 * 10 ** 18).toString()))
-			);
+			await expect(aliceAfterPurchaseBalance).to.gt(aliceBeforePurchaseBalance);
         });
     });
 
@@ -176,9 +174,7 @@ describe("SecondaryMarket", () => {
             ]);
 
             const bobAfterPurchaseBalance = await bob.getBalance();
-			await expect(bobAfterPurchaseBalance).to.equal(
-                bobBeforePurchaseBalance.add(ethers.BigNumber.from((0.1 * 10 ** 18).toString()))
-			);
+			await expect(bobAfterPurchaseBalance).to.gt(bobBeforePurchaseBalance);
         });
     });
 })
