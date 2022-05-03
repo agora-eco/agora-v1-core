@@ -1,4 +1,4 @@
-# Agora Corve v1
+# Agora Core v1
 
 This repository holds the core smart contracts powering the Agora ecosystem along with example market extensions for developers to draw inspiration from.
 
