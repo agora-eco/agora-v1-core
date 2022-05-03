@@ -1,15 +1,7 @@
-# Basic Sample Hardhat Project
+# Agora Corve v1
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+This repository holds the core smart contracts powering the Agora ecosystem along with example market extensions for developers to draw inspiration from.
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat accounts
-npx hardhat compile // npm run compile
-npx hardhat clean
-npx hardhat test // npm run test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+Documentation coming soon.
+Website coming soon.
+Improvements coming soon.
