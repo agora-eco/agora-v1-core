@@ -7,8 +7,6 @@ import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
 import "hardhat/console.sol";
 
-import "./Market.sol";
-
 contract MarketFactory {
     using Strings for string;
 

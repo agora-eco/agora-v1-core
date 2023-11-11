@@ -3,12 +3,14 @@ const { ethers } = require("hardhat");
 import { Signer } from "ethers";
 import { MarketFactory } from "../src/Types/MarketFactory";
 import { Market } from "../src/Types/Market";
+import { Greeter } from "../src/Types/Greeter";
 import DefaultMarketAbi from "../artifacts/contracts/base/Market.sol/Market.json";
 
 describe("MarketFactory", () => {
 	let accounts: Signer[];
 	let marketFactory: MarketFactory;
 	let market: Market;
+	let greeter: Greeter;
 	let market2: Market;
 	let alice: Signer, bob: Signer;
 
@@ -32,11 +34,21 @@ describe("MarketFactory", () => {
 			const Market = await ethers.getContractFactory("Market");
 			market = await Market.deploy();
 		});
+		it("Deploy Default", async () => {
+			const Greeter = await ethers.getContractFactory("Greeter");
+			greeter = await Greeter.deploy("hello");
+		});
 
 		it("Add Factory Extension", async () => {
 			const addFactoryExtensionTx = await marketFactory
 				.connect(alice)
 				.addExtension("Default", market.address);
+			await addFactoryExtensionTx.wait();
+		});
+		it("Add Factory Extension", async () => {
+			const addFactoryExtensionTx = await marketFactory
+				.connect(alice)
+				.addExtension("Greeter", greeter.address);
 			await addFactoryExtensionTx.wait();
 		});
 	});

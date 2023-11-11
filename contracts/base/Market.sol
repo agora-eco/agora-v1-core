@@ -133,13 +133,41 @@ contract Market is IMarket, Initializable, AccessControlUpgradeable {
     /**
      * @dev See {IMarket-create}
      */
+    function _create(
+        string calldata productCode,
+        string calldata productName,
+        uint256 price,
+        uint256 quantity
+    ) internal {
+        _create(productCode, productName, price, quantity, false);
+    }
+
     function create(
         string calldata productCode,
         string calldata productName,
         uint256 price,
         uint256 quantity
     ) external virtual override isAdmin productNotExist(productCode) {
-        create(productCode, productName, price, quantity, false);
+        _create(productCode, productName, price, quantity, false);
+    }
+
+    function _create(
+        string memory productCode,
+        string memory productName,
+        uint256 price,
+        uint256 quantity,
+        bool locked
+    ) internal {
+        _catalog[productCode] = Product(
+            true,
+            price,
+            productName,
+            quantity,
+            _msgSender(),
+            locked
+        );
+
+        emit Create(productCode, productName, price, quantity, _msgSender());
     }
 
     /**
@@ -152,16 +180,7 @@ contract Market is IMarket, Initializable, AccessControlUpgradeable {
         uint256 quantity,
         bool locked
     ) public isAdmin productNotExist(productCode) {
-        _catalog[productCode] = Product(
-            true,
-            price,
-            productName,
-            quantity,
-            _msgSender(),
-            locked
-        );
-
-        emit Create(productCode, productName, price, quantity, _msgSender());
+        _create(productCode, productName, price, quantity, locked);
     }
 
     /**
